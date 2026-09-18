@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumariq — Admin Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* =============================================
+   VARIABLES
+============================================= */
+:root {
+  --black:       #000000;
+  --deep-brown:  #1f0f08;
+  --ivory:       #f8efe5;
+  --taupe:       #b6a795;
+  --taupe-dim:   rgba(182,167,149,0.15);
+  --taupe-mid:   rgba(182,167,149,0.4);
+  --ivory-dim:   rgba(248,239,229,0.05);
+  --ivory-soft:  rgba(248,239,229,0.55);
+  --danger:      #c0392b;
+  --danger-dim:  rgba(192,57,43,0.12);
+  --success:     #27ae60;
+  --success-dim: rgba(39,174,96,0.12);
+  --warn:        #e67e22;
+  --sidebar-w:   248px;
+  --font-ui:     'SF Pro Display',-apple-system,'Segoe UI',sans-serif;
+  --font-serif:  'Cormorant Garamond',Georgia,serif;
+  --ease:        0.26s cubic-bezier(0.25,0.46,0.45,0.94);
+  --radius:      3px;
+}
+
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{font-size:15px;}
+body{background:#0c0804;color:var(--ivory);font-family:var(--font-ui);
+  -webkit-font-smoothing:antialiased;min-height:100vh;display:flex;overflow-x:hidden;}
+
+/* =============================================
+   TOAST
+============================================= */
+#toast-container{
+  position:fixed;top:20px;right:20px;z-index:9999;
+  display:flex;flex-direction:column;gap:8px;pointer-events:none;
+}
+.toast{
+  background:var(--deep-brown);border:1px solid var(--taupe-dim);
+  border-left:3px solid var(--taupe);color:var(--ivory);
+  padding:12px 18px;font-size:0.78rem;min-width:240px;max-width:360px;
+  pointer-events:all;animation:toastIn .28s ease forwards;line-height:1.5;
+}
+.toast.success{border-left-color:var(--success);}
+.toast.error  {border-left-color:var(--danger);}
+.toast.warn   {border-left-color:var(--warn);}
+.toast.out    {animation:toastOut .28s ease forwards;}
+@keyframes toastIn  {from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes toastOut {from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(16px)}}
+
+/* =============================================
+   SIDEBAR
+============================================= */
+.sidebar{
+  width:var(--sidebar-w);min-height:100vh;background:var(--black);
+  border-right:1px solid var(--taupe-dim);display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;bottom:0;z-index:100;
+  transition:transform var(--ease);
+}
+.sidebar-logo{padding:28px 24px 24px;border-bottom:1px solid var(--taupe-dim);}
+.sidebar-logo .wordmark{
+  font-family:var(--font-ui);font-size:0.7rem;letter-spacing:0.35em;
+  text-transform:uppercase;color:var(--ivory);text-decoration:none;display:block;margin-bottom:3px;
+}
+.sidebar-logo .sub{font-size:0.55rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--taupe);opacity:0.5;}
+.sidebar-nav{flex:1;padding:16px 0;overflow-y:auto;}
+.nav-group-label{
+  font-size:0.5rem;letter-spacing:0.3em;text-transform:uppercase;
+  color:var(--taupe);opacity:0.4;padding:14px 24px 6px;display:block;
+}
+.sidebar-link{
+  display:flex;align-items:center;gap:11px;padding:9px 24px;
+  color:rgba(248,239,229,0.4);text-decoration:none;font-size:0.76rem;
+  letter-spacing:0.05em;transition:color var(--ease),background var(--ease);
+  cursor:pointer;border:none;background:none;width:100%;text-align:left;position:relative;
+}
+.sidebar-link svg{width:14px;height:14px;opacity:0.55;flex-shrink:0;transition:opacity var(--ease);}
+.sidebar-link:hover,.sidebar-link.active{color:var(--ivory);background:var(--ivory-dim);}
+.sidebar-link.active svg{opacity:1;}
+.sidebar-link.active::before{
+  content:'';position:absolute;left:0;top:5px;bottom:5px;width:2px;background:var(--taupe);
+}
+.sidebar-footer{padding:18px 24px;border-top:1px solid var(--taupe-dim);}
+.user-info{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.user-avatar{
+  width:30px;height:30px;border-radius:50%;background:var(--taupe-dim);
+  border:1px solid var(--taupe-dim);display:flex;align-items:center;justify-content:center;
+  font-size:0.68rem;color:var(--taupe);font-weight:500;flex-shrink:0;
+}
+.user-email{font-size:0.68rem;color:var(--taupe);opacity:0.6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.btn-signout{
+  display:flex;align-items:center;gap:7px;font-size:0.66rem;
+  letter-spacing:0.1em;color:rgba(248,239,229,0.28);background:none;border:none;
+  cursor:pointer;transition:color var(--ease);width:100%;
+}
+.btn-signout:hover{color:var(--danger);}
+
+/* =============================================
+   MAIN
+============================================= */
+.main{margin-left:var(--sidebar-w);flex:1;min-height:100vh;display:flex;flex-direction:column;}
+.topbar{
+  height:58px;background:rgba(0,0,0,0.7);backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--taupe-dim);display:flex;align-items:center;
+  justify-content:space-between;padding:0 32px;position:sticky;top:0;z-index:50;
+}
+.topbar-title{font-size:0.68rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--taupe);}
+.sidebar-toggle{display:none;background:none;border:none;cursor:pointer;flex-direction:column;gap:4px;padding:4px;}
+.sidebar-toggle span{display:block;width:19px;height:1px;background:var(--taupe);transition:var(--ease);}
+.panel{display:none;flex:1;padding:36px 32px;animation:panelIn .22s ease;}
+.panel.active{display:block;}
+@keyframes panelIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* =============================================
+   BUTTONS
+============================================= */
+.btn{
+  display:inline-flex;align-items:center;gap:7px;font-family:var(--font-ui);
+  font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;
+  padding:9px 20px;border:none;cursor:pointer;
+  transition:background var(--ease),color var(--ease),opacity var(--ease);
+  text-decoration:none;white-space:nowrap;border-radius:var(--radius);
+}
+.btn svg{width:12px;height:12px;}
+.btn-primary{background:var(--ivory);color:var(--black);}
+.btn-primary:hover{background:var(--taupe);color:var(--ivory);}
+.btn-ghost{background:var(--ivory-dim);color:var(--ivory-soft);border:1px solid var(--taupe-dim);}
+.btn-ghost:hover{background:var(--taupe-dim);color:var(--ivory);}
+.btn-danger{background:var(--danger-dim);color:var(--danger);border:1px solid rgba(192,57,43,0.25);}
+.btn-danger:hover{background:var(--danger);color:#fff;}
+.btn-sm{padding:6px 13px;font-size:0.6rem;}
+.btn:disabled{opacity:0.38;cursor:not-allowed;}
+
+/* =============================================
+   STATS ROW
+============================================= */
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:36px;}
+.stat-card{
+  background:var(--black);border:1px solid var(--taupe-dim);padding:22px 20px;position:relative;overflow:hidden;
+}
+.stat-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(to right,var(--taupe),transparent);opacity:0.35;
+}
+.stat-label{font-size:0.53rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--taupe);opacity:0.55;margin-bottom:8px;}
+.stat-value{font-family:var(--font-serif);font-size:2rem;font-weight:300;color:var(--ivory);line-height:1;margin-bottom:3px;}
+.stat-sub{font-size:0.58rem;color:var(--taupe);opacity:0.45;}
+
+/* =============================================
+   SECTION HEADER
+============================================= */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;gap:14px;flex-wrap:wrap;}
+.section-title{font-size:0.62rem;letter-spacing:0.28em;text-transform:uppercase;color:var(--taupe);}
+
+/* =============================================
+   FILTER BAR
+============================================= */
+.filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.search-wrap{position:relative;flex:1;min-width:180px;}
+.search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:12px;height:12px;color:var(--taupe);opacity:0.45;pointer-events:none;}
+.search-input{
+  width:100%;background:var(--black);border:1px solid var(--taupe-dim);color:var(--ivory);
+  font-size:0.76rem;padding:8px 11px 8px 32px;outline:none;font-family:var(--font-ui);
+  transition:border-color var(--ease);border-radius:var(--radius);
+}
+.search-input::placeholder{color:var(--taupe);opacity:0.38;}
+.search-input:focus{border-color:var(--taupe);}
+.filter-select{
+  background:var(--black);border:1px solid var(--taupe-dim);color:var(--ivory-soft);
+  font-size:0.7rem;padding:8px 11px;outline:none;font-family:var(--font-ui);
+  cursor:pointer;transition:border-color var(--ease);border-radius:var(--radius);
+}
+.filter-select:focus{border-color:var(--taupe);}
+
+/* =============================================
+   PROJECTS TABLE
+============================================= */
+.projects-table-wrap{overflow-x:auto;}
+.projects-table{width:100%;border-collapse:collapse;font-size:0.74rem;}
+.projects-table th{
+  font-size:0.52rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--taupe);
+  opacity:0.45;padding:9px 14px;text-align:left;border-bottom:1px solid var(--taupe-dim);white-space:nowrap;
+}
+.projects-table td{padding:13px 14px;border-bottom:1px solid rgba(182,167,149,0.06);color:var(--ivory-soft);vertical-align:middle;}
+.projects-table tr:last-child td{border-bottom:none;}
+.projects-table tr:hover td{background:var(--ivory-dim);color:var(--ivory);}
+.thumb{width:46px;height:34px;object-fit:cover;display:block;background:var(--taupe-dim);}
+.thumb-placeholder{width:46px;height:34px;background:var(--taupe-dim);display:flex;align-items:center;justify-content:center;}
+.thumb-placeholder svg{width:13px;height:13px;color:var(--taupe);opacity:0.35;}
+.title-cell{max-width:220px;}
+.project-name{color:var(--ivory);font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:190px;display:block;}
+.project-slug{font-size:0.6rem;color:var(--taupe);opacity:0.45;margin-top:2px;}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:0.56rem;letter-spacing:0.12em;text-transform:uppercase;padding:3px 9px;border-radius:20px;white-space:nowrap;}
+.badge-published{background:var(--success-dim);color:var(--success);}
+.badge-draft{background:var(--taupe-dim);color:var(--taupe);}
+.badge-featured{background:rgba(230,126,34,0.12);color:var(--warn);}
+.badge-dot{width:4px;height:4px;border-radius:50%;background:currentColor;}
+.row-actions{display:flex;align-items:center;gap:5px;}
+.icon-btn{
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+  background:none;border:1px solid var(--taupe-dim);cursor:pointer;color:var(--taupe);
+  transition:background var(--ease),color var(--ease),border-color var(--ease);border-radius:var(--radius);
+}
+.icon-btn svg{width:12px;height:12px;}
+.icon-btn:hover{background:var(--taupe-dim);color:var(--ivory);border-color:var(--taupe);}
+.icon-btn.danger:hover{background:var(--danger-dim);color:var(--danger);border-color:var(--danger);}
+.empty-state{text-align:center;padding:72px 20px;}
+.empty-state svg{width:36px;height:36px;color:var(--taupe);opacity:0.18;margin-bottom:14px;}
+.empty-state p{font-family:var(--font-serif);font-style:italic;color:var(--taupe);opacity:0.45;font-size:0.95rem;}
+
+/* =============================================
+   MODAL
+============================================= */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(7px);
+  z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;
+  opacity:0;pointer-events:none;transition:opacity .22s ease;
+}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{
+  background:#0f0905;border:1px solid var(--taupe-dim);width:100%;max-width:800px;
+  max-height:92vh;overflow-y:auto;transform:translateY(10px);transition:transform .22s ease;position:relative;
+}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-sm{max-width:520px;}
+.modal-header{
+  padding:24px 28px 18px;border-bottom:1px solid var(--taupe-dim);
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;background:#0f0905;z-index:2;
+}
+.modal-title{font-size:0.62rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--taupe);}
+.modal-close{
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+  background:none;border:1px solid var(--taupe-dim);cursor:pointer;color:var(--taupe);
+  transition:background var(--ease),color var(--ease);border-radius:var(--radius);
+}
+.modal-close:hover{background:var(--taupe-dim);color:var(--ivory);}
+.modal-close svg{width:13px;height:13px;}
+.modal-body{padding:24px 28px;}
+.modal-footer{
+  padding:18px 28px;border-top:1px solid var(--taupe-dim);
+  display:flex;gap:10px;justify-content:flex-end;
+  position:sticky;bottom:0;background:#0f0905;
+}
+
+/* =============================================
+   FORM ELEMENTS
+============================================= */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+.form-grid.cols-3{grid-template-columns:1fr 1fr 1fr;}
+.form-grid.cols-1{grid-template-columns:1fr;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group.full{grid-column:1/-1;}
+.form-label{font-size:0.56rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--taupe);opacity:0.65;}
+.form-input,.form-select,.form-textarea{
+  background:var(--black);border:1px solid var(--taupe-dim);color:var(--ivory);
+  font-size:0.78rem;padding:9px 12px;font-family:var(--font-ui);outline:none;
+  transition:border-color var(--ease);width:100%;border-radius:var(--radius);
+}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--taupe);}
+.form-textarea{resize:vertical;min-height:90px;line-height:1.6;}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--taupe);opacity:0.32;}
+.form-select option{background:#0c0804;}
+.form-hint{font-size:0.58rem;color:var(--taupe);opacity:0.45;margin-top:2px;}
+
+/* Toggle */
+.toggle-row{display:flex;align-items:center;gap:12px;}
+.toggle-label{font-size:0.7rem;color:var(--ivory-soft);cursor:pointer;}
+.toggle{position:relative;width:34px;height:19px;flex-shrink:0;}
+.toggle input{opacity:0;width:0;height:0;position:absolute;}
+.toggle-track{position:absolute;inset:0;background:var(--taupe-dim);border:1px solid var(--taupe-dim);cursor:pointer;transition:background var(--ease);border-radius:20px;}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:11px;height:11px;background:var(--taupe);border-radius:50%;transition:transform var(--ease),background var(--ease);}
+.toggle input:checked~.toggle-track{background:rgba(39,174,96,0.18);border-color:var(--success);}
+.toggle input:checked~.toggle-thumb{transform:translateX(15px);background:var(--success);}
+
+/* =============================================
+   IMAGE UPLOAD ZONE
+============================================= */
+.upload-zone{
+  border:1px dashed rgba(182,167,149,0.28);padding:32px 20px;text-align:center;
+  cursor:pointer;transition:border-color var(--ease),background var(--ease);
+  background:var(--black);position:relative;border-radius:var(--radius);
+}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--taupe);background:var(--ivory-dim);}
+.upload-zone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{width:28px;height:28px;color:var(--taupe);opacity:0.38;margin:0 auto 10px;}
+.upload-zone p{font-size:0.72rem;color:var(--taupe);opacity:0.55;line-height:1.6;}
+.upload-zone strong{color:var(--ivory-soft);font-weight:400;}
+
+/* Single image preview (hero / about) */
+.img-preview-wrap{position:relative;margin-top:12px;}
+.img-preview{
+  width:100%;height:180px;object-fit:cover;display:block;
+  border:1px solid var(--taupe-dim);border-radius:var(--radius);
+}
+.img-preview-remove{
+  position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.7);
+  border:1px solid var(--taupe-dim);color:var(--danger);
+  width:26px;height:26px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;border-radius:var(--radius);font-size:14px;line-height:1;
+  transition:background var(--ease);
+}
+.img-preview-remove:hover{background:var(--danger);color:#fff;}
+
+/* Progress bar */
+.progress-bar-wrap{height:2px;background:var(--taupe-dim);border-radius:2px;overflow:hidden;margin-top:8px;}
+.progress-bar-fill{height:100%;background:var(--taupe);transition:width .2s ease;width:0%;}
+.upload-status{font-size:0.65rem;color:var(--taupe);opacity:0.6;margin-top:6px;}
+
+/* Gallery grid (project images) */
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-top:14px;}
+.gallery-item{position:relative;aspect-ratio:4/3;background:var(--taupe-dim);overflow:hidden;cursor:grab;border:1px solid transparent;transition:border-color var(--ease);border-radius:var(--radius);}
+.gallery-item.cover-img{border-color:var(--taupe);}
+.gallery-item img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;}
+.gallery-item-actions{position:absolute;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;gap:5px;opacity:0;transition:opacity var(--ease);}
+.gallery-item:hover .gallery-item-actions{opacity:1;}
+.gallery-cover-badge{position:absolute;top:5px;left:5px;font-size:0.46rem;letter-spacing:0.15em;text-transform:uppercase;background:var(--taupe);color:var(--black);padding:2px 5px;border-radius:2px;}
+
+/* Upload progress list */
+.upload-progress-list{display:flex;flex-direction:column;gap:6px;margin-top:12px;}
+.upload-item{background:var(--black);border:1px solid var(--taupe-dim);padding:9px 12px;border-radius:var(--radius);}
+.upload-item-name{font-size:0.68rem;color:var(--ivory-soft);margin-bottom:5px;display:flex;justify-content:space-between;}
+
+/* =============================================
+   TESTIMONIALS LIST
+============================================= */
+.testimonial-list{display:flex;flex-direction:column;gap:10px;}
+.testimonial-item{
+  background:var(--black);border:1px solid var(--taupe-dim);padding:18px 22px;
+  display:grid;grid-template-columns:1fr auto;gap:14px;align-items:start;
+  border-radius:var(--radius);
+}
+.testimonial-quote{font-family:var(--font-serif);font-style:italic;font-size:0.88rem;color:var(--ivory-soft);line-height:1.65;margin-bottom:8px;}
+.testimonial-meta{font-size:0.63rem;color:var(--taupe);opacity:0.55;letter-spacing:0.06em;}
+
+/* =============================================
+   SERVICES LIST
+============================================= */
+.services-list{display:flex;flex-direction:column;gap:8px;}
+.service-item{
+  background:var(--black);border:1px solid var(--taupe-dim);padding:16px 22px;
+  display:grid;grid-template-columns:32px 1fr auto;gap:14px;align-items:center;
+  border-radius:var(--radius);
+}
+.service-item-num{font-family:var(--font-serif);font-size:1.3rem;color:var(--taupe);opacity:0.28;line-height:1;}
+.service-item-title{font-size:0.8rem;color:var(--ivory);margin-bottom:2px;}
+.service-item-desc{font-size:0.68rem;color:var(--taupe);opacity:0.55;line-height:1.5;}
+
+/* =============================================
+   SETTINGS SECTIONS
+============================================= */
+.settings-block{margin-bottom:36px;padding-bottom:36px;border-bottom:1px solid var(--taupe-dim);}
+.settings-block:last-child{border-bottom:none;margin-bottom:0;}
+.settings-block-title{
+  font-size:0.55rem;letter-spacing:0.3em;text-transform:uppercase;
+  color:var(--taupe);opacity:0.45;margin-bottom:18px;
+  display:flex;align-items:center;gap:10px;
+}
+.settings-block-title::after{content:'';flex:1;height:1px;background:var(--taupe-dim);}
+
+/* =============================================
+   CONFIRM DIALOG
+============================================= */
+.confirm-body{padding:24px 28px;font-size:0.8rem;color:var(--ivory-soft);line-height:1.6;}
+.confirm-body strong{color:var(--ivory);}
+
+/* =============================================
+   SPINNER
+============================================= */
+.spinner{width:16px;height:16px;border:2px solid var(--taupe-dim);border-top-color:var(--taupe);border-radius:50%;animation:spin .65s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* =============================================
+   RESPONSIVE
+============================================= */
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-left:0;}
+  .sidebar-toggle{display:flex;}
+  .stats-row{grid-template-columns:repeat(2,1fr);}
+  .form-grid{grid-template-columns:1fr;}
+  .form-grid.cols-3{grid-template-columns:1fr 1fr;}
+  .panel{padding:24px 18px;}
+}
+@media(max-width:520px){
+  .stats-row{grid-template-columns:1fr 1fr;}
+  .form-grid.cols-3{grid-template-columns:1fr;}
+  .topbar{padding:0 16px;}
+}
+</style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<!-- =============================================
+     SIDEBAR
+============================================= -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <a href="/" class="wordmark" target="_blank">Lumariq</a>
+    <span class="sub">CMS Dashboard</span>
+  </div>
+
+  <nav class="sidebar-nav">
+    <span class="nav-group-label">Overview</span>
+    <button class="sidebar-link active" data-panel="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Dashboard
+    </button>
+
+    <span class="nav-group-label">Content</span>
+    <button class="sidebar-link" data-panel="projects">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="14" rx="1"/><path d="M8 21h8M12 17v4"/></svg>
+      Projects
+    </button>
+    <button class="sidebar-link" data-panel="services">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      Services
+    </button>
+    <button class="sidebar-link" data-panel="testimonials">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      Testimonials
+    </button>
+
+    <span class="nav-group-label">Site</span>
+    <button class="sidebar-link" data-panel="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+      Site Settings
+    </button>
+
+    <span class="nav-group-label">View</span>
+    <a class="sidebar-link" href="/" target="_blank">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg>
+      View Website
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar" id="userInitials">—</div>
+      <span class="user-email" id="userEmail">…</span>
+    </div>
+    <button class="btn-signout" id="signoutBtn">
+      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+      Sign out
+    </button>
+  </div>
+</aside>
+
+<!-- =============================================
+     MAIN
+============================================= -->
+<div class="main">
+  <header class="topbar">
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <span class="topbar-title" id="topbarTitle">Dashboard</span>
+    <div id="topbarActions"></div>
+  </header>
+
+  <!-- ==========================================
+       DASHBOARD
+  =========================================== -->
+  <div class="panel active" id="panel-dashboard">
+    <div class="stats-row">
+      <div class="stat-card"><p class="stat-label">Total Projects</p><p class="stat-value" id="stat-total">—</p><p class="stat-sub">all entries</p></div>
+      <div class="stat-card"><p class="stat-label">Published</p><p class="stat-value" id="stat-published">—</p><p class="stat-sub">live on site</p></div>
+      <div class="stat-card"><p class="stat-label">Featured</p><p class="stat-value" id="stat-featured">—</p><p class="stat-sub">homepage</p></div>
+      <div class="stat-card"><p class="stat-label">Testimonials</p><p class="stat-value" id="stat-testimonials">—</p><p class="stat-sub">client reviews</p></div>
+      <div class="stat-card"><p class="stat-label">Services</p><p class="stat-value" id="stat-services">—</p><p class="stat-sub">offerings</p></div>
+    </div>
+    <div class="section-header">
+      <span class="section-title">Recent Projects</span>
+      <button class="btn btn-primary btn-sm" id="dashNewProject">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Project
+      </button>
+    </div>
+    <div id="dash-recent-wrap"></div>
+  </div>
+
+  <!-- ==========================================
+       PROJECTS
+  =========================================== -->
+  <div class="panel" id="panel-projects">
+    <div class="section-header">
+      <span class="section-title">All Projects</span>
+      <button class="btn btn-primary btn-sm" id="newProjectBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Project
+      </button>
+    </div>
+    <div class="filter-bar">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input class="search-input" type="text" id="projectSearch" placeholder="Search projects…">
+      </div>
+      <select class="filter-select" id="projectCatFilter">
+        <option value="">All categories</option>
+        <option>Residential</option><option>Commercial</option>
+        <option>Hospitality</option><option>Retail</option>
+        <option>Office</option><option>Other</option>
+      </select>
+      <select class="filter-select" id="projectStatusFilter">
+        <option value="">All statuses</option>
+        <option value="published">Published</option>
+        <option value="draft">Draft</option>
+      </select>
+      <select class="filter-select" id="projectSort">
+        <option value="created_at_desc">Newest first</option>
+        <option value="created_at_asc">Oldest first</option>
+        <option value="title_asc">Title A–Z</option>
+        <option value="sort_order_asc">Sort order</option>
+      </select>
+    </div>
+    <div class="projects-table-wrap">
+      <table class="projects-table">
+        <thead><tr>
+          <th style="width:54px"></th><th>Title</th><th>Category</th>
+          <th>Year</th><th>Status</th><th>Featured</th>
+          <th style="width:154px">Actions</th>
+        </tr></thead>
+        <tbody id="projectsTableBody"><tr><td colspan="7"><div class="empty-state"><div class="spinner"></div></div></td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SERVICES
+  =========================================== -->
+  <div class="panel" id="panel-services">
+    <div class="section-header">
+      <span class="section-title">Services</span>
+      <button class="btn btn-primary btn-sm" id="newServiceBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Service
+      </button>
+    </div>
+    <p style="font-size:0.68rem;color:var(--taupe);opacity:0.5;margin-bottom:18px;">Changes update the live website instantly.</p>
+    <div class="services-list" id="servicesList"></div>
+  </div>
+
+  <!-- ==========================================
+       TESTIMONIALS
+  =========================================== -->
+  <div class="panel" id="panel-testimonials">
+    <div class="section-header">
+      <span class="section-title">Testimonials</span>
+      <button class="btn btn-primary btn-sm" id="newTestimonialBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Testimonial
+      </button>
+    </div>
+    <p style="font-size:0.68rem;color:var(--taupe);opacity:0.5;margin-bottom:18px;">These appear in the testimonials section of the homepage.</p>
+    <div class="testimonial-list" id="testimonialList"></div>
+  </div>
+
+  <!-- ==========================================
+       SITE SETTINGS
+  =========================================== -->
+  <div class="panel" id="panel-settings">
+    <div class="section-header">
+      <span class="section-title">Site Settings</span>
+      <button class="btn btn-primary btn-sm" id="saveSettingsBtn">Save All Changes</button>
+    </div>
+
+    <form id="settingsForm" onsubmit="return false;">
+
+      <!-- HERO -->
+      <div class="settings-block">
+        <p class="settings-block-title">Hero Section</p>
+        <div class="form-grid" style="margin-bottom:18px;">
+          <div class="form-group">
+            <label class="form-label">Hero Title</label>
+            <input class="form-input" type="text" name="hero_title" placeholder="We design what you feel.">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hero Subtitle</label>
+            <input class="form-input" type="text" name="hero_subtitle" placeholder="Interior design and spatial visualization…">
+          </div>
+        </div>
+
+        <!-- HERO IMAGE UPLOAD -->
+        <div class="form-group full">
+          <label class="form-label">Hero Image</label>
+          <div class="upload-zone" id="heroImgZone">
+            <input type="file" id="heroImgInput" accept="image/*">
+            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <p><strong>Click or drag</strong> to upload hero image<br><span style="font-size:0.62rem;">Recommended: 1600×900px, JPG or WebP</span></p>
+          </div>
+          <div class="progress-bar-wrap" id="heroImgProgress" style="display:none;"><div class="progress-bar-fill" id="heroImgFill"></div></div>
+          <p class="upload-status" id="heroImgStatus"></p>
+          <div id="heroImgPreview"></div>
+          <input type="hidden" name="hero_image_url" id="heroImgUrl">
+        </div>
+      </div>
+
+      <!-- ABOUT -->
+      <div class="settings-block">
+        <p class="settings-block-title">About Section</p>
+        <div class="form-group full" style="margin-bottom:18px;">
+          <label class="form-label">About Text</label>
+          <textarea class="form-textarea" name="about_text" rows="6" placeholder="At Lumariq, we believe the spaces around you…"></textarea>
+          <p class="form-hint">Separate paragraphs with a blank line.</p>
+        </div>
+
+        <!-- ABOUT IMAGE UPLOAD -->
+        <div class="form-group full">
+          <label class="form-label">About Section Image</label>
+          <div class="upload-zone" id="aboutImgZone">
+            <input type="file" id="aboutImgInput" accept="image/*">
+            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <p><strong>Click or drag</strong> to upload about image<br><span style="font-size:0.62rem;">Recommended: 1400×800px, JPG or WebP</span></p>
+          </div>
+          <div class="progress-bar-wrap" id="aboutImgProgress" style="display:none;"><div class="progress-bar-fill" id="aboutImgFill"></div></div>
+          <p class="upload-status" id="aboutImgStatus"></p>
+          <div id="aboutImgPreview"></div>
+          <input type="hidden" name="about_image_url" id="aboutImgUrl">
+        </div>
+      </div>
+
+      <!-- CONTACT -->
+      <div class="settings-block">
+        <p class="settings-block-title">Contact</p>
+        <div class="form-grid cols-3">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input class="form-input" type="email" name="contact_email" placeholder="hello@lumariq.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input class="form-input" type="text" name="contact_phone" placeholder="+971 00 000 0000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Location / Address</label>
+            <input class="form-input" type="text" name="contact_address" placeholder="UAE & India">
+          </div>
+        </div>
+      </div>
+
+      <!-- SOCIAL -->
+      <div class="settings-block">
+        <p class="settings-block-title">Social Links</p>
+        <div class="form-grid cols-3">
+          <div class="form-group">
+            <label class="form-label">Instagram URL</label>
+            <input class="form-input" type="url" name="social_instagram" placeholder="https://instagram.com/lumariq">
+          </div>
+          <div class="form-group">
+            <label class="form-label">LinkedIn URL</label>
+            <input class="form-input" type="url" name="social_linkedin" placeholder="https://linkedin.com/…">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Behance URL</label>
+            <input class="form-input" type="url" name="social_behance" placeholder="https://behance.net/…">
+          </div>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="settings-block">
+        <p class="settings-block-title">Footer</p>
+        <div class="form-group">
+          <label class="form-label">Footer Tagline</label>
+          <input class="form-input" type="text" name="footer_tagline" placeholder="Interior design and spatial visualization for those who…">
+        </div>
+      </div>
+
+      <!-- SEO -->
+      <div class="settings-block">
+        <p class="settings-block-title">SEO</p>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">SEO Page Title</label>
+            <input class="form-input" type="text" name="seo_title" placeholder="LUMARIQ — Interior Design & Visualization Studio">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Meta Description</label>
+            <input class="form-input" type="text" name="seo_description" placeholder="Emotion-led interior design and visualization…">
+          </div>
+        </div>
+      </div>
+
+    </form>
+  </div><!-- /panel-settings -->
+
+</div><!-- /.main -->
+
+<!-- =============================================
+     PROJECT FORM MODAL
+============================================= -->
+<div class="modal-overlay" id="projectModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="projectModalTitle">New Project</span>
+      <button class="modal-close" id="projectModalClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <form id="projectForm" onsubmit="return false;">
+        <input type="hidden" id="projectId">
+        <div class="form-grid" style="margin-bottom:16px;">
+          <div class="form-group">
+            <label class="form-label">Title *</label>
+            <input class="form-input" type="text" id="pTitle" placeholder="Villa Lumis" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Slug (auto)</label>
+            <input class="form-input" type="text" id="pSlug" placeholder="villa-lumis">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-select" id="pCategory">
+              <option value="">Select…</option>
+              <option>Residential</option><option>Commercial</option>
+              <option>Hospitality</option><option>Retail</option>
+              <option>Office</option><option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Location</label>
+            <input class="form-input" type="text" id="pLocation" placeholder="Dubai, UAE">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Year</label>
+            <input class="form-input" type="number" id="pYear" placeholder="2024" min="2000" max="2099">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Client</label>
+            <input class="form-input" type="text" id="pClient" placeholder="Private client">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Video URL</label>
+            <input class="form-input" type="url" id="pVideo" placeholder="https://youtube.com/…">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Sort Order</label>
+            <input class="form-input" type="number" id="pSortOrder" placeholder="0" min="0">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:18px;">
+          <label class="form-label">Description</label>
+          <textarea class="form-textarea" id="pDescription" rows="4" placeholder="Describe the project mood, design intent…"></textarea>
+        </div>
+        <div style="display:flex;gap:28px;margin-bottom:24px;flex-wrap:wrap;">
+          <div class="toggle-row">
+            <label class="toggle" for="pPublished"><input type="checkbox" id="pPublished"><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
+            <span class="toggle-label">Published</span>
+          </div>
+          <div class="toggle-row">
+            <label class="toggle" for="pFeatured"><input type="checkbox" id="pFeatured"><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
+            <span class="toggle-label">Featured on homepage</span>
+          </div>
+        </div>
+        <!-- Project images -->
+        <p class="form-label" style="margin-bottom:10px;">Project Images</p>
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="imageUploadInput" accept="image/*" multiple>
+          <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p><strong>Drag & drop or click</strong> — JPG, PNG, WebP</p>
+        </div>
+        <div class="upload-progress-list" id="uploadProgressList"></div>
+        <div class="gallery-grid" id="galleryGrid"></div>
+        <p style="font-size:0.58rem;color:var(--taupe);opacity:0.45;margin-top:8px;">⋆ Click star to set cover · Drag to reorder · Hover to delete</p>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="projectModalCancel">Cancel</button>
+      <button class="btn btn-primary" id="saveProjectBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save Project
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- =============================================
+     SERVICE MODAL
+============================================= -->
+<div class="modal-overlay" id="serviceModal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <span class="modal-title" id="serviceModalTitle">Add Service</span>
+      <button class="modal-close" id="serviceModalClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="serviceId">
+      <div class="form-group" style="margin-bottom:14px;">
+        <label class="form-label">Title *</label>
+        <input class="form-input" type="text" id="sTitle" placeholder="Interior Design">
+      </div>
+      <div class="form-group" style="margin-bottom:14px;">
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea" id="sDescription" rows="3" placeholder="Emotion-led interior concepts…"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Sort Order</label>
+        <input class="form-input" type="number" id="sSortOrder" placeholder="0" min="0">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="serviceModalCancel">Cancel</button>
+      <button class="btn btn-primary" id="saveServiceBtn">Save Service</button>
+    </div>
+  </div>
+</div>
+
+<!-- =============================================
+     TESTIMONIAL MODAL
+============================================= -->
+<div class="modal-overlay" id="testimonialModal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <span class="modal-title" id="testimonialModalTitle">Add Testimonial</span>
+      <button class="modal-close" id="testimonialModalClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="testimonialId">
+      <div class="form-group" style="margin-bottom:14px;">
+        <label class="form-label">Quote *</label>
+        <textarea class="form-textarea" id="tQuote" rows="4" placeholder="Lumariq helped us see what our home could become…"></textarea>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Client Name *</label>
+          <input class="form-input" type="text" id="tName" placeholder="Rami & Sara Al Nasser">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role / Project</label>
+          <input class="form-input" type="text" id="tRole" placeholder="Private Villa, Dubai">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="testimonialModalCancel">Cancel</button>
+      <button class="btn btn-primary" id="saveTestimonialBtn">Save Testimonial</button>
+    </div>
+  </div>
+</div>
+
+<!-- =============================================
+     CONFIRM MODAL
+============================================= -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <span class="modal-title">Confirm Delete</span>
+      <button class="modal-close" id="confirmModalClose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="confirm-body" id="confirmModalBody">Are you sure? This cannot be undone.</div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" id="confirmModalCancel">Cancel</button>
+      <button class="btn btn-danger" id="confirmModalConfirm">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- =============================================
+     SCRIPTS
+============================================= -->
+<script src="js/supabase.js"></script>
+<script src="js/admin.js"></script>
+
+<!-- Inline: settings image upload wiring -->
+<script>
+/* ── Single-image upload helper (hero + about) ── */
+function wireSingleImageUpload({ zoneId, inputId, fillId, progressId, statusId, previewId, urlFieldId, folder }) {
+  const zone     = document.getElementById(zoneId);
+  const input    = document.getElementById(inputId);
+  const fill     = document.getElementById(fillId);
+  const progress = document.getElementById(progressId);
+  const status   = document.getElementById(statusId);
+  const preview  = document.getElementById(previewId);
+  const urlField = document.getElementById(urlFieldId);
+
+  if (!zone || !input) return;
+
+  zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', ()  => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('dragover');
+    if (e.dataTransfer.files[0]) handleSingleUpload(e.dataTransfer.files[0]);
+  });
+  input.addEventListener('change', () => {
+    if (input.files[0]) { handleSingleUpload(input.files[0]); input.value = ''; }
+  });
+
+  async function handleSingleUpload(file) {
+    if (!file.type.startsWith('image/')) { alert('Please select an image file.'); return; }
+    progress.style.display = 'block'; fill.style.width = '0%';
+    status.textContent = 'Uploading…';
+
+    try {
+      let pct = 0;
+      const timer = setInterval(() => { pct = Math.min(pct + 12, 85); fill.style.width = pct + '%'; }, 180);
+
+      const { path, publicUrl } = await uploadFile(file, folder);
+      clearInterval(timer); fill.style.width = '100%';
+
+      urlField.value = publicUrl;
+      status.textContent = 'Uploaded ✓';
+
+      // Show preview
+      preview.innerHTML = `
+        <div class="img-preview-wrap">
+          <img class="img-preview" src="${publicUrl}" alt="">
+          <button class="img-preview-remove" title="Remove" onclick="
+            document.getElementById('${urlFieldId}').value='';
+            document.getElementById('${previewId}').innerHTML='';
+            document.getElementById('${statusId}').textContent='';
+            document.getElementById('${progressId}').style.display='none';
+          ">✕</button>
+        </div>`;
+
+      setTimeout(() => { progress.style.display = 'none'; }, 1200);
+    } catch (e) {
+      fill.style.width = '0%';
+      status.textContent = 'Upload failed: ' + (e.message || 'error');
+      console.error(e);
+    }
+  }
+}
+
+// Wire hero image upload
+wireSingleImageUpload({
+  zoneId    : 'heroImgZone',
+  inputId   : 'heroImgInput',
+  fillId    : 'heroImgFill',
+  progressId: 'heroImgProgress',
+  statusId  : 'heroImgStatus',
+  previewId : 'heroImgPreview',
+  urlFieldId: 'heroImgUrl',
+  folder    : 'site/hero',
+});
+
+// Wire about image upload
+wireSingleImageUpload({
+  zoneId    : 'aboutImgZone',
+  inputId   : 'aboutImgInput',
+  fillId    : 'aboutImgFill',
+  progressId: 'aboutImgProgress',
+  statusId  : 'aboutImgStatus',
+  previewId : 'aboutImgPreview',
+  urlFieldId: 'aboutImgUrl',
+  folder    : 'site/about',
+});
+
+/* ── Pre-fill image previews when settings loads ── */
+// Patch into admin.js's loadSettings to also show existing images
+const _origLoadSettings = typeof loadSettings === 'function' ? loadSettings : null;
+window.addEventListener('settingsLoaded', (e) => {
+  const s = e.detail;
+  if (s.hero_image_url)  showExistingImg('heroImgPreview',  'heroImgUrl',  s.hero_image_url,  'heroImgStatus',  'heroImgProgress');
+  if (s.about_image_url) showExistingImg('aboutImgPreview', 'aboutImgUrl', s.about_image_url, 'aboutImgStatus', 'aboutImgProgress');
+});
+
+function showExistingImg(previewId, urlFieldId, url, statusId, progressId) {
+  document.getElementById(urlFieldId).value = url;
+  document.getElementById(previewId).innerHTML = `
+    <div class="img-preview-wrap">
+      <img class="img-preview" src="${url}" alt="">
+      <button class="img-preview-remove" title="Remove" onclick="
+        document.getElementById('${urlFieldId}').value='';
+        document.getElementById('${previewId}').innerHTML='';
+        document.getElementById('${statusId}').textContent='';
+      ">✕</button>
+    </div>`;
+}
+</script>
+</body>
+</html>

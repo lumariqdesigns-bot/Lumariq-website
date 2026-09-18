@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Lumariq — Admin Login</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+
+<style>
+/* =============================================
+   VARIABLES (matched to site system)
+============================================= */
+:root {
+  --black:       #000000;
+  --deep-brown:  #1f0f08;
+  --ivory:       #f8efe5;
+  --taupe:       #b6a795;
+  --taupe-dim:   rgba(182,167,149,0.18);
+  --danger:      #c0392b;
+  --success:     #4f9d6e;
+  --font-primary:   'SF Pro Display', -apple-system, 'Segoe UI', sans-serif;
+  --font-secondary: 'Cormorant Garamond', Georgia, serif;
+  --transition:      0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --transition-fast: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { font-size:16px; }
+
+body {
+  min-height:100vh;
+  background:var(--black);
+  color:var(--ivory);
+  font-family:var(--font-primary);
+  -webkit-font-smoothing:antialiased;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  overflow:hidden;
+  padding:32px;
+}
+
+/* =============================================
+   AMBIENT BACKGROUND
+   Architectural grid + slow radial glow, echoing
+   the hero treatment used across the site.
+============================================= */
+.bg-grid {
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(182,167,149,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(182,167,149,0.05) 1px, transparent 1px);
+  background-size:64px 64px;
+  pointer-events:none;
+}
+
+.bg-glow {
+  position:fixed;
+  width:900px; height:900px;
+  left:50%; top:50%;
+  transform:translate(-50%,-50%);
+  background:radial-gradient(circle, rgba(182,167,149,0.07) 0%, transparent 65%);
+  pointer-events:none;
+  animation:glowPulse 8s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% { opacity:0.6; transform:translate(-50%,-50%) scale(1); }
+  50%      { opacity:1;   transform:translate(-50%,-50%) scale(1.08); }
+}
+
+.bg-vignette {
+  position:fixed; inset:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 100%, rgba(0,0,0,0.7) 0%, transparent 70%);
+  pointer-events:none;
+}
+
+/* =============================================
+   FRAME
+   The login form reads as a framed plate, not a
+   generic rounded card — hairline border, sharp
+   corners, like a label on an architectural plan.
+============================================= */
+.frame {
+  position:relative;
+  z-index:2;
+  width:100%;
+  max-width:420px;
+  opacity:0;
+  animation:fadeUp .9s cubic-bezier(0.25,0.46,0.45,0.94) .15s forwards;
+}
+
+.plate {
+  background:rgba(31,15,8,0.55);
+  border:1px solid var(--taupe-dim);
+  backdrop-filter:blur(18px);
+  padding:56px 48px 44px;
+  position:relative;
+}
+
+/* corner ticks — architectural plan motif */
+.plate::before, .plate::after {
+  content:'';
+  position:absolute;
+  width:14px; height:14px;
+  border:1px solid var(--taupe);
+  opacity:0.55;
+}
+.plate::before { top:-1px; left:-1px; border-right:none; border-bottom:none; }
+.plate::after  { bottom:-1px; right:-1px; border-left:none; border-top:none; }
+
+.mark {
+  text-align:center;
+  margin-bottom:6px;
+}
+
+.mark-word {
+  font-family:var(--font-primary);
+  font-size:0.78rem;
+  letter-spacing:0.42em;
+  text-transform:uppercase;
+  color:var(--ivory);
+  font-weight:400;
+}
+
+.mark-rule {
+  width:28px; height:1px;
+  background:var(--taupe);
+  opacity:0.45;
+  margin:18px auto 18px;
+}
+
+.frame-title {
+  text-align:center;
+  font-family:var(--font-secondary);
+  font-style:italic;
+  font-weight:300;
+  font-size:1.5rem;
+  color:var(--taupe);
+  margin-bottom:38px;
+  letter-spacing:0.01em;
+}
+
+/* =============================================
+   FORM
+============================================= */
+.field { margin-bottom:18px; }
+
+.field-label {
+  display:block;
+  font-size:0.56rem;
+  letter-spacing:0.24em;
+  text-transform:uppercase;
+  color:var(--taupe);
+  opacity:0.65;
+  margin-bottom:8px;
+}
+
+input {
+  width:100%;
+  padding:13px 0;
+  background:transparent;
+  border:none;
+  border-bottom:1px solid var(--taupe-dim);
+  color:var(--ivory);
+  font-family:var(--font-primary);
+  font-size:0.92rem;
+  letter-spacing:0.01em;
+  outline:none;
+  transition:border-color var(--transition-fast);
+}
+
+input::placeholder { color:rgba(248,239,229,0.25); }
+
+input:focus { border-color:var(--taupe); }
+
+button {
+  width:100%;
+  padding:15px;
+  margin-top:14px;
+  background:var(--ivory);
+  color:var(--black);
+  border:none;
+  font-family:var(--font-primary);
+  font-size:0.68rem;
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  cursor:pointer;
+  transition:background var(--transition-fast), color var(--transition-fast);
+}
+
+button:hover { background:var(--taupe); color:var(--ivory); }
+
+button:disabled { opacity:0.45; cursor:not-allowed; }
+
+.btn-secondary {
+  background:transparent;
+  color:rgba(248,239,229,0.55);
+  border:1px solid var(--taupe-dim);
+}
+
+.btn-secondary:hover { background:var(--taupe-dim); color:var(--ivory); }
+
+/* =============================================
+   MESSAGES
+============================================= */
+#error, #resetError {
+  margin-top:18px;
+  text-align:center;
+  font-size:0.76rem;
+  color:var(--danger);
+  letter-spacing:0.02em;
+  min-height:1px;
+}
+
+#resetSuccess {
+  margin-top:18px;
+  text-align:center;
+  font-size:0.76rem;
+  color:var(--success);
+  line-height:1.6;
+  font-family:var(--font-secondary);
+  font-style:italic;
+}
+
+.forgot-link {
+  display:block;
+  text-align:center;
+  margin-top:26px;
+  font-family:var(--font-secondary);
+  font-style:italic;
+  font-size:0.88rem;
+  color:var(--taupe);
+  text-decoration:none;
+  cursor:pointer;
+  transition:color var(--transition-fast);
+}
+
+.forgot-link:hover { color:var(--ivory); }
+
+.frame-foot {
+  text-align:center;
+  margin-top:32px;
+  font-size:0.58rem;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  color:rgba(248,239,229,0.18);
+}
+
+/* =============================================
+   MODAL
+============================================= */
+.modal-overlay {
+  position:fixed; inset:0;
+  background:rgba(0,0,0,0.85);
+  backdrop-filter:blur(8px);
+  z-index:1000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .25s ease;
+}
+
+.modal-overlay.open { opacity:1; pointer-events:all; }
+
+.modal-plate {
+  background:#0f0905;
+  border:1px solid var(--taupe-dim);
+  width:100%;
+  max-width:400px;
+  padding:44px 40px;
+  position:relative;
+  transform:translateY(8px);
+  transition:transform .25s ease;
+}
+
+.modal-overlay.open .modal-plate { transform:translateY(0); }
+
+.modal-plate::before, .modal-plate::after {
+  content:'';
+  position:absolute;
+  width:14px; height:14px;
+  border:1px solid var(--taupe);
+  opacity:0.55;
+}
+.modal-plate::before { top:-1px; left:-1px; border-right:none; border-bottom:none; }
+.modal-plate::after  { bottom:-1px; right:-1px; border-left:none; border-top:none; }
+
+.modal-title {
+  text-align:center;
+  font-family:var(--font-secondary);
+  font-style:italic;
+  font-weight:300;
+  font-size:1.35rem;
+  color:var(--ivory);
+  margin-bottom:12px;
+}
+
+.modal-sub {
+  text-align:center;
+  font-size:0.78rem;
+  color:rgba(248,239,229,0.45);
+  line-height:1.6;
+  margin-bottom:30px;
+}
+
+.modal-actions {
+  display:flex;
+  gap:10px;
+  margin-top:6px;
+}
+
+/* =============================================
+   ANIMATIONS
+============================================= */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(22px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* =============================================
+   RESPONSIVE
+============================================= */
+@media (max-width:480px) {
+  .plate { padding:44px 28px 36px; }
+  .bg-glow { width:600px; height:600px; }
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+<div class="bg-vignette"></div>
+
+<div class="frame">
+  <div class="plate">
+
+    <div class="mark">
+      <span class="mark-word">Lumariq</span>
+    </div>
+    <div class="mark-rule"></div>
+    <div class="frame-title">Admin Login</div>
+
+    <div class="field">
+      <label class="field-label">Email</label>
+      <input id="email" type="email" placeholder="you@lumariq.com">
+    </div>
+
+    <div class="field">
+      <label class="field-label">Password</label>
+      <input id="password" type="password" placeholder="••••••••">
+    </div>
+
+    <button onclick="login()" id="loginBtn">Login</button>
+
+    <a class="forgot-link" id="forgotLink">Forgot password?</a>
+
+    <div id="error"></div>
+
+  </div>
+
+  <div class="frame-foot">CMS Dashboard</div>
+</div>
+
+<!-- Forgot password modal -->
+<div class="modal-overlay" id="forgotModal">
+  <div class="modal-plate">
+
+    <div class="modal-title">Reset Password</div>
+    <div class="modal-sub">Enter your admin email and we'll send a link to reset your password.</div>
+
+    <div class="field">
+      <label class="field-label">Email</label>
+      <input id="resetEmail" type="email" placeholder="you@lumariq.com">
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" id="cancelResetBtn">Cancel</button>
+      <button id="sendResetBtn">Send Reset Link</button>
+    </div>
+
+    <div id="resetError"></div>
+    <div id="resetSuccess"></div>
+
+  </div>
+</div>
+
+<script>
+
+async function login(){
+
+const email=document.getElementById("email").value;
+
+const password=document.getElementById("password").value;
+
+const btn=document.getElementById("loginBtn");
+btn.disabled=true;
+btn.textContent="Logging in…";
+
+const {error}=await db.auth.signInWithPassword({
+
+email,
+password
+
+});
+
+if(error){
+
+document.getElementById("error").innerHTML=error.message;
+btn.disabled=false;
+btn.textContent="Login";
+
+return;
+
+}
+
+location.href="admin.html";
+
+}
+
+db.auth.getSession().then(({data})=>{
+
+if(data.session){
+
+location.href="admin.html";
+
+}
+
+});
+
+/* ===== Forgot password ===== */
+
+const forgotModal = document.getElementById("forgotModal");
+const forgotLink  = document.getElementById("forgotLink");
+const cancelBtn   = document.getElementById("cancelResetBtn");
+const sendBtn     = document.getElementById("sendResetBtn");
+const resetEmail  = document.getElementById("resetEmail");
+const resetError  = document.getElementById("resetError");
+const resetSuccess= document.getElementById("resetSuccess");
+
+forgotLink.addEventListener("click", () => {
+
+  resetError.textContent = "";
+  resetSuccess.textContent = "";
+  resetEmail.value = document.getElementById("email").value || "";
+  sendBtn.disabled = false;
+  sendBtn.textContent = "Send Reset Link";
+  forgotModal.classList.add("open");
+
+});
+
+cancelBtn.addEventListener("click", () => {
+
+  forgotModal.classList.remove("open");
+
+});
+
+forgotModal.addEventListener("click", (e) => {
+
+  if(e.target === forgotModal){
+    forgotModal.classList.remove("open");
+  }
+
+});
+
+sendBtn.addEventListener("click", async () => {
+
+  const email = resetEmail.value.trim();
+  resetError.textContent = "";
+  resetSuccess.textContent = "";
+
+  if(!email){
+    resetError.textContent = "Please enter your email.";
+    return;
+  }
+
+  sendBtn.disabled = true;
+  sendBtn.textContent = "Sending…";
+
+  const redirectTo = location.origin + location.pathname.replace(/login\.html$/, "") + "reset-password.html";
+
+  const { error } = await db.auth.resetPasswordForEmail(email, {
+    redirectTo
+  });
+
+  sendBtn.disabled = false;
+  sendBtn.textContent = "Send Reset Link";
+
+  if(error){
+    resetError.textContent = error.message;
+    return;
+  }
+
+  resetSuccess.textContent = "If an account exists for that email, a reset link has been sent.";
+
+});
+
+</script>
+
+</body>
+
+</html>
