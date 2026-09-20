@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LUMARIQ — Interior Design & Visualization Studio-test update</title>
+<title>LUMARIQ — Interior Design & Visualization Studio</title>
+<link rel="icon" type="image/png" href="FAVICON.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
 <style>
@@ -144,13 +145,23 @@ nav.scrolled {
 }
 
 .nav-logo {
-  font-family: var(--font-primary);
-  font-size: 1.1rem;
-  letter-spacing: 0.35em;
-  text-transform: uppercase;
-  color: var(--taupe);
+  display: block;
+  line-height: 0;
   text-decoration: none;
-  font-weight: 400;
+}
+
+.nav-logo img {
+  height: 22px;
+  width: auto;
+  display: block;
+}
+
+.nav-logo .logo-black { display: none; }
+nav.scrolled .nav-logo .logo-cream { display: none; }
+nav.scrolled .nav-logo .logo-black { display: block; }
+
+@media (max-width: 600px) {
+  .nav-logo img { height: 18px; }
 }
 
 .nav-links {
@@ -1678,15 +1689,18 @@ footer {
      NAVIGATION
 ============================================= -->
 <nav id="mainNav">
-  <a href="#" class="nav-logo">Lumariq</a>
+  <a href="#" class="nav-logo" aria-label="Lumariq — home">
+    <img class="logo-cream" src="LOGO_CREAM.png" alt="Lumariq">
+    <img class="logo-black" src="LOGO_BLACK.png" alt="Lumariq">
+  </a>
   <ul class="nav-links">
-    <li><a href="#about">About</a></li>
+    <li><a href="#projects">Work</a></li>
     <li><a href="#services">Services</a></li>
-    <li><a href="#projects">Projects</a></li>
     <li><a href="#process">Process</a></li>
+    <li><a href="#about">About</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
-  <a href="#contact" class="nav-cta">Begin a Project</a>
+  <a href="#contact" class="nav-cta">Start a project</a>
   <button class="nav-menu-btn" aria-label="Menu">
     <span></span><span></span><span></span>
   </button>
