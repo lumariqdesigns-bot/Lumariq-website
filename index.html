@@ -6,7 +6,7 @@
 <title>LUMARIQ — Interior Design & Visualization Studio</title>
 <link rel="icon" type="image/png" href="FAVICON.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet">
 <style>
 /* =============================================
    CSS VARIABLES & RESET
@@ -16,8 +16,8 @@
   --deep-brown: #1f0f08;
   --ivory: #f8efe5;
   --taupe: #b6a795;
-  --font-primary: 'Gilroy', 'SF Pro Display', -apple-system, sans-serif;
-  --font-secondary: 'Cormorant Garamond', 'Minion Pro', Georgia, serif;
+  --font-primary: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+  --font-secondary: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
   --transition: 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --transition-fast: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
@@ -176,7 +176,7 @@ nav.scrolled .nav-logo .logo-black { display: block; }
   font-size: 0.72rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--taupe);
+  color: rgba(248, 239, 229, 0.85);
   text-decoration: none;
   position: relative;
   transition: color var(--transition-fast);
@@ -239,10 +239,10 @@ nav.scrolled .nav-logo {
 ============================================= */
 .hero {
   min-height: 100vh;
+  min-height: 100svh;
   background: var(--black);
   position: relative;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: block;
   overflow: hidden;
 }
 
@@ -250,13 +250,15 @@ nav.scrolled .nav-logo {
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 0 72px 80px 72px;
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: 140px 72px 96px 72px;
   position: relative;
   z-index: 2;
 }
 
 .hero-label {
-  color: var(--taupe);
+  color: rgba(248, 239, 229, 0.75);
   margin-bottom: 32px;
   opacity: 0;
   animation: fadeUp 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.4s forwards;
@@ -275,28 +277,33 @@ nav.scrolled .nav-logo {
 }
 
 .hero h1 em {
-  font-family: var(--font-secondary);
-  font-style: italic;
-  font-weight: 300;
+  font-family: var(--font-primary);
+  font-style: normal;
+  font-weight: 200;
   color: var(--taupe);
 }
 
 .hero-para {
   font-family: var(--font-secondary);
-  font-size: 1.1rem;
-  color: rgba(248, 239, 229, 0.6);
+  font-size: 0.98rem;
+  color: rgba(248, 239, 229, 0.85);
   line-height: 1.8;
-  max-width: 380px;
-  margin-bottom: 52px;
+  max-width: 520px;
+  margin-bottom: 44px;
   font-weight: 300;
   opacity: 0;
   animation: fadeUp 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0.8s forwards;
 }
 
+.hero-actions .btn-outline {
+  border-color: rgba(248, 239, 229, 0.6);
+}
+
 .hero-actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 40px;
+  gap: 20px;
   opacity: 0;
   animation: fadeUp 1s cubic-bezier(0.25, 0.46, 0.45, 0.94) 1s forwards;
 }
@@ -325,7 +332,7 @@ nav.scrolled .nav-logo {
   font-size: 1rem;
   color: var(--taupe);
   text-decoration: none;
-  font-style: italic;
+  font-style: normal;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -360,17 +367,32 @@ nav.scrolled .nav-logo {
 }
 .hero-image {
   display: block;
-  margin: 0 auto;
   width: 100%;
-  max-width: 100%;
-  height: auto;
+  height: 100%;
   object-fit: cover;
+  object-position: center;
 }
 .hero-section {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  position: absolute;
+  inset: 0;
+  z-index: 0;
   overflow: hidden;
+  background: var(--deep-brown);
+}
+
+/* Soft dark layer so the menu and text are always readable on top of the picture */
+.hero-section::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to right, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0) 65%),
+    linear-gradient(to bottom,
+      rgba(0,0,0,0.6) 0%,
+      rgba(0,0,0,0.15) 24%,
+      rgba(0,0,0,0.3) 50%,
+      rgba(0,0,0,0.85) 100%);
+  pointer-events: none;
 }
 .hero-image-placeholder {
   width: 100%;
@@ -404,9 +426,8 @@ nav.scrolled .nav-logo {
 
 .hero-scroll-indicator {
   position: absolute;
-  bottom: 70px;
-  left: 3%;
-  transform: translateX(-50%);
+  bottom: 48px;
+  right: 48px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -445,7 +466,7 @@ nav.scrolled .nav-logo {
   font-family: var(--font-secondary);
   font-size: 0.8rem;
   color: rgba(248,239,229,0.4);
-  font-style: italic;
+  font-style: normal;
   writing-mode: vertical-rl;
   letter-spacing: 0.1em;
 }
@@ -534,7 +555,7 @@ nav.scrolled .nav-logo {
   top: -20px;
   left: -20px;
   pointer-events: none;
-  font-style: italic;
+  font-style: normal;
   letter-spacing: -0.05em;
 }
 
@@ -549,7 +570,7 @@ nav.scrolled .nav-logo {
 
 .about h2 em {
   font-family: var(--font-secondary);
-  font-style: italic;
+  font-style: normal;
   color: var(--taupe);
 }
 
@@ -628,7 +649,7 @@ nav.scrolled .nav-logo {
 
 .about-image-caption p {
   font-family: var(--font-secondary);
-  font-style: italic;
+  font-style: normal;
   font-size: 0.85rem;
   color: rgba(248,239,229,0.45);
   margin: 0;
@@ -658,7 +679,7 @@ nav.scrolled .nav-logo {
 
 .services h2 em {
   font-family: var(--font-secondary);
-  font-style: italic;
+  font-style: normal;
   color: var(--taupe);
 }
 
@@ -779,7 +800,7 @@ nav.scrolled .nav-logo {
 
 .projects h2 em {
   font-family: var(--font-secondary);
-  font-style: italic;
+  font-style: normal;
   color: var(--taupe);
 }
 
@@ -946,7 +967,7 @@ nav.scrolled .nav-logo {
 
 .process h2 em {
   font-family: var(--font-secondary);
-  font-style: italic;
+  font-style: normal;
   color: var(--taupe);
 }
 
@@ -1056,7 +1077,7 @@ nav.scrolled .nav-logo {
 
 .testimonials h2 em {
   font-family: var(--font-secondary);
-  font-style: italic;
+  font-style: normal;
   color: var(--taupe);
 }
 
@@ -1091,7 +1112,7 @@ blockquote {
   color: rgba(248,239,229,0.8);
   line-height: 1.75;
   font-weight: 300;
-  font-style: italic;
+  font-style: normal;
   margin-bottom: 40px;
   position: relative;
   z-index: 1;
@@ -1116,7 +1137,7 @@ blockquote {
   font-family: var(--font-secondary);
   font-size: 0.82rem;
   color: var(--taupe);
-  font-style: italic;
+  font-style: normal;
 }
 
 /* =============================================
@@ -1170,7 +1191,7 @@ blockquote {
 
 .cta-section h2 em {
   font-family: var(--font-secondary);
-  font-style: italic;
+  font-style: normal;
   color: var(--taupe);
 }
 
@@ -1333,6 +1354,21 @@ footer {
 }
 
 /* =============================================
+   MONTSERRAT SIZE TWEAKS
+   (Montserrat is wider than the old serif font)
+============================================= */
+.about-right p { font-size: 0.92rem; }
+.services-header-right p { font-size: 0.85rem; }
+.service-card p { font-size: 0.8rem; }
+.process-step p { font-size: 0.8rem; }
+blockquote { font-size: 0.95rem; }
+.author-role { font-size: 0.75rem; }
+.cta-section .cta-sub { font-size: 0.95rem; }
+.footer-brand p { font-size: 0.8rem; }
+.footer-col ul li a { font-size: 0.82rem; }
+.about-image-caption p { font-size: 0.75rem; }
+
+/* =============================================
    RESPONSIVE
 ============================================= */
 @media (max-width: 1100px) {
@@ -1395,8 +1431,7 @@ footer {
     margin: 0;
     width: 100%;
     height: 100vh;
-    background: rgba(8, 4, 2, 0.98);
-    backdrop-filter: blur(18px);
+    background: #080402;
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -1444,6 +1479,10 @@ footer {
     background: var(--taupe);
   }
 
+  nav.scrolled .nav-links a {
+    color: var(--ivory);
+  }
+
   /* Hamburger -> X animation */
   .nav-menu-btn span {
     background: var(--ivory);
@@ -1475,20 +1514,12 @@ footer {
   }
 
   /* HERO */
-  .hero {
-    grid-template-columns: 1fr;
-  }
-
   .hero-content {
-    padding: 120px 32px 72px;
-  }
-
-  .hero-visual {
-    height: 50vw;
+    padding: 120px 32px 80px;
   }
 
   .hero h1 {
-    font-size: clamp(2.8rem, 8vw, 5rem);
+    font-size: clamp(2.2rem, 9vw, 4.5rem);
   }
 
   /* ABOUT */
@@ -1635,6 +1666,16 @@ footer {
 
 @media (max-width: 600px) {
 
+  .hero-scroll-indicator {
+    right: 20px;
+    bottom: 32px;
+  }
+
+  .hero-label {
+    letter-spacing: 0.16em;
+    font-size: 0.58rem;
+  }
+
   .about-stats {
     grid-template-columns: 1fr;
     gap: 28px;
@@ -1717,31 +1758,27 @@ footer {
 ============================================= -->
 <section class="hero">
   <div class="hero-content">
-    <span class="label hero-label">Interior Design & Visualization — Est. 2018</span>
+    <span class="label hero-label">Interior Design & Visualization</span>
     <h1 id="heroTitle">We design<br>what you <em>feel.</em></h1>
-    <p class="hero-para" id="heroPara">Interior design and spatial visualization crafted to translate emotion into atmosphere — creating spaces that feel as good as they look.</p>
+    <p class="hero-para" id="heroPara">Interior and exterior design and visualization for the UAE, Saudi Arabia, India and Qatar.</p>
     <div class="hero-actions">
-      <a href="#projects" class="btn-primary">Explore Our Work</a>
-      <a href="#about" class="btn-text-link">Our Philosophy</a>
+      <a href="#projects" class="btn-primary">See our work</a>
+      <a href="#contact" class="btn-outline">Start a project</a>
     </div>
   </div>
 
- <div class="hero-section">
-  <img 
-    src=""
-    alt="Hero Image"
-    class="hero-image"
-    style="opacity:0;transition:opacity 0.6s ease;"
-  />
-</div>
+  <div class="hero-section">
+    <img
+      src=""
+      alt="Lumariq interior design render"
+      class="hero-image"
+      style="opacity:0;transition:opacity 0.6s ease;"
+    />
+  </div>
 
   <div class="hero-scroll-indicator">
     <div class="scroll-line"></div>
     <span>Scroll</span>
-  </div>
-
-  <div class="hero-meta">
-    <p class="hero-meta-text">Design and visualization studio — UAE & India</p>
   </div>
 </section>
 
