@@ -724,12 +724,24 @@ nav {
 }
 
 .service-number {
-  font-family: var(--font-secondary);
-  font-size: 0.75rem;
-  color: var(--taupe);
-  opacity: 0.5;
-  margin-bottom: 48px;
-  display: block;
+  position: absolute;
+  top: -0.12em;
+  left: 20px;
+  font-family: var(--font-primary);
+  font-size: clamp(5.5rem, 11vw, 8.5rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--ivory);
+  opacity: 0.07;
+  line-height: 1;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+  transition: opacity var(--transition);
+}
+
+.service-card:hover .service-number {
+  opacity: 0.12;
 }
 
 .service-icon {
@@ -737,6 +749,8 @@ nav {
   height: 36px;
   margin-bottom: 36px;
   opacity: 0.6;
+  position: relative;
+  z-index: 1;
 }
 
 .service-card h3 {
@@ -747,6 +761,8 @@ nav {
   line-height: 1.3;
   margin-bottom: 20px;
   font-family: var(--font-primary);
+  position: relative;
+  z-index: 1;
 }
 
 .service-card p {
@@ -754,6 +770,8 @@ nav {
   font-size: 0.88rem;
   color: rgba(248,239,229,0.45);
   line-height: 1.7;
+  position: relative;
+  z-index: 1;
 }
 
 .service-arrow {
@@ -765,6 +783,7 @@ nav {
   opacity: 0;
   transform: translateX(-8px);
   transition: opacity var(--transition), transform var(--transition);
+  z-index: 1;
 }
 
 .service-card:hover .service-arrow {
@@ -944,25 +963,8 @@ nav {
 ============================================= */
 .process {
   padding: 160px 72px;
-  background: var(--stone);
-  position: relative;
+  background: var(--black);
 }
-
-/* soft fade from the dark sections, so the light part never arrives suddenly */
-.process::before,
-.process::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 150px;
-  pointer-events: none;
-  z-index: 0;
-}
-.process::before { top: 0;    background: linear-gradient(to bottom, rgba(8,4,2,1), rgba(8,4,2,0)); }
-.process::after  { bottom: 0; background: linear-gradient(to top,    rgba(8,4,2,1), rgba(8,4,2,0)); }
-.process > * { position: relative; z-index: 1; }
-.process .label { color: rgba(31,15,8,0.55); }
 
 .process-header {
   text-align: center;
@@ -971,7 +973,7 @@ nav {
 
 .process h2 {
   font-size: clamp(2.4rem, 3.5vw, 3.8rem);
-  color: var(--deep-brown);
+  color: var(--ivory);
   font-weight: 200;
   margin-top: 20px;
 }
@@ -979,7 +981,7 @@ nav {
 .process h2 em {
   font-family: var(--font-secondary);
   font-style: normal;
-  color: #8a7a67;
+  color: var(--taupe);
 }
 
 .process-steps {
@@ -1011,13 +1013,13 @@ nav {
 .step-dot {
   width: 56px;
   height: 56px;
-  border: 1px solid rgba(31,15,8,0.25);
+  border: 1px solid rgba(182,167,149,0.3);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 36px;
-  background: var(--stone);
+  background: var(--deep-brown);
   position: relative;
   z-index: 1;
   transition: border-color var(--transition), background var(--transition);
@@ -1025,13 +1027,13 @@ nav {
 
 .process-step:hover .step-dot {
   border-color: var(--taupe);
-  background: var(--deep-brown);
+  background: rgba(182,167,149,0.12);
 }
 
 .step-dot span {
   font-family: var(--font-secondary);
   font-size: 0.8rem;
-  color: rgba(31,15,8,0.6);
+  color: var(--taupe);
   font-weight: 300;
 }
 
@@ -1044,15 +1046,15 @@ nav {
   font-size: 0.58rem;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: var(--deep-brown);
+  color: var(--taupe);
   margin-bottom: 10px;
-  opacity: 0.55;
+  opacity: 0.7;
 }
 
 .process-step h3 {
   font-family: var(--font-primary);
   font-size: 0.95rem;
-  color: var(--deep-brown);
+  color: var(--ivory);
   font-weight: 300;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1062,7 +1064,7 @@ nav {
 .process-step p {
   font-family: var(--font-secondary);
   font-size: 0.88rem;
-  color: rgba(31,15,8,0.75);
+  color: rgba(248,239,229,0.5);
   line-height: 1.65;
 }
 
@@ -1070,6 +1072,7 @@ nav {
    TESTIMONIALS
 ============================================= */
 .testimonials {
+  display: none;   /* hidden for now — still managed in the admin panel */
   padding: 160px 72px;
   background: var(--deep-brown);
 }
@@ -1382,7 +1385,6 @@ footer {
 ============================================= */
 .about-right p { font-size: 0.92rem; }
 .services-header-right p { font-size: 0.85rem; }
-.service-card p { font-size: 0.8rem; }
 .process-step p { font-size: 0.8rem; }
 blockquote { font-size: 0.95rem; }
 .author-role { font-size: 0.75rem; }
@@ -1554,14 +1556,13 @@ blockquote { font-size: 0.95rem; }
     gap: 20px;
   }
 
-  /* KEEP 3 COLUMNS */
-  .services-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1px;
-  }
-
   .service-card {
     padding: 32px 18px;
+  }
+
+  .service-number {
+    font-size: clamp(4rem, 20vw, 5.5rem);
+    left: 10px;
   }
 
   .service-card h3 {
@@ -1577,10 +1578,6 @@ blockquote { font-size: 0.95rem; }
     width: 26px;
     height: 26px;
     margin-bottom: 20px;
-  }
-
-  .service-number {
-    margin-bottom: 24px;
   }
 
   .service-arrow {
@@ -1691,41 +1688,6 @@ blockquote { font-size: 0.95rem; }
     gap: 28px;
   }
 
-  /* KEEP 3 SERVICES PER ROW EVEN ON MOBILE */
-  .services-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1px;
-  }
-
-  .service-card {
-    padding: 24px 12px;
-  }
-
-  .service-card h3 {
-    font-size: 0.68rem;
-    line-height: 1.4;
-  }
-
-  .service-card p {
-    font-size: 0.62rem;
-    line-height: 1.4;
-  }
-
-  .service-icon {
-    width: 20px;
-    height: 20px;
-    margin-bottom: 14px;
-  }
-
-  .service-number {
-    margin-bottom: 16px;
-    font-size: 0.58rem;
-  }
-
-  .service-arrow {
-    display: none;
-  }
-
   .process-steps {
     grid-template-columns: 1fr;
   }
@@ -1807,28 +1769,6 @@ a:focus-visible, button:focus-visible {
 </section>
 
 <!-- =============================================
-     MARQUEE
-============================================= -->
-<div class="marquee-strip">
-  <div class="marquee-track">
-    <div class="marquee-item">Interior Design <span class="dot"></span></div>
-    <div class="marquee-item">3D Visualization <span class="dot"></span></div>
-    <div class="marquee-item">Walkthrough Animation <span class="dot"></span></div>
-    <div class="marquee-item">360° VR Experience <span class="dot"></span></div>
-    <div class="marquee-item">Design Consultation <span class="dot"></span></div>
-    <div class="marquee-item">Spatial Concepts <span class="dot"></span></div>
-    <div class="marquee-item">Emotion-Led Design <span class="dot"></span></div>
-    <div class="marquee-item">Interior Design <span class="dot"></span></div>
-    <div class="marquee-item">3D Visualization <span class="dot"></span></div>
-    <div class="marquee-item">Walkthrough Animation <span class="dot"></span></div>
-    <div class="marquee-item">360° VR Experience <span class="dot"></span></div>
-    <div class="marquee-item">Design Consultation <span class="dot"></span></div>
-    <div class="marquee-item">Spatial Concepts <span class="dot"></span></div>
-    <div class="marquee-item">Emotion-Led Design <span class="dot"></span></div>
-  </div>
-</div>
-
-<!-- =============================================
      ABOUT
 ============================================= -->
 <section class="about" id="about">
@@ -1862,13 +1802,13 @@ a:focus-visible, button:focus-visible {
     </div>
   </div>
 
-  <div class="services-grid" id="servicesGrid">
+    <div class="services-grid" id="servicesGrid">
     <div class="service-card reveal">
       <span class="service-number">01</span>
       <svg class="service-icon" viewBox="0 0 36 36" fill="none" stroke="rgba(248,239,229,0.5)" stroke-width="1">
         <rect x="4" y="4" width="28" height="28"/><line x1="4" y1="14" x2="32" y2="14"/><line x1="14" y1="4" x2="14" y2="32"/>
       </svg>
-       <h3>Interior Design</h3>
+      <h3>Interior Design</h3>
       <p>Emotion-led interior concepts designed around atmosphere, materiality, and spatial experience.</p>
       <span class="service-arrow">→</span>
     </div>
@@ -1887,8 +1827,7 @@ a:focus-visible, button:focus-visible {
         <circle cx="18" cy="18" r="12"/><circle cx="18" cy="18" r="5"/><line x1="18" y1="3" x2="18" y2="8"/><line x1="18" y1="28" x2="18" y2="33"/>
       </svg>
       <h3>360° Walkthrough Experience</h3>
-      <p>Immersive walkthrough experiences that allow clients to explore spaces before they are built.
-</p>
+      <p>Immersive walkthrough experiences that allow clients to explore spaces before they are built.</p>
       <span class="service-arrow">→</span>
     </div>
     <div class="service-card reveal reveal-delay-3">
@@ -1909,19 +1848,16 @@ a:focus-visible, button:focus-visible {
       <p>Precise technical documentation prepared for coordination, detailing, and execution support.</p>
       <span class="service-arrow">→</span>
     </div>
-  
-    
-     <div class="service-card reveal reveal-delay-5">
+    <div class="service-card reveal reveal-delay-5">
       <span class="service-number">06</span>
       <svg class="service-icon" viewBox="0 0 36 36" fill="none" stroke="rgba(248,239,229,0.5)" stroke-width="1">
-        <circle cx="18" cy="12" r="7"/><path d="M4 32 C4 24 32 24 32 32"/>
+        <rect x="3" y="3" width="30" height="22"/><line x1="3" y1="10" x2="33" y2="10"/><circle cx="8" cy="6.5" r="1.5"/>
       </svg>
       <h3>Video Visualization</h3>
-      <p>Animated walkthroughs crafted to
-present atmosphere, lighting, and
-realistic spatial experience.</p>
+      <p>Animated walkthroughs crafted to present atmosphere, lighting, and realistic spatial experience.</p>
       <span class="service-arrow">→</span>
     </div>
+  </div>
 </section>
 
 <!-- =============================================
@@ -2033,7 +1969,7 @@ realistic spatial experience.</p>
     <p class="cta-sub reveal reveal-delay-2">We work with a small number of exceptional clients each year. If you are ready to begin, we would be honoured to hear from you.</p>
     <div class="cta-buttons reveal reveal-delay-3">
       <a href="mailto:hello@lumariq.com" class="btn-primary">Get in Touch</a>
-      <a href="#projects" class="btn-outline">View Our Work</a>
+      <a href="https://wa.me/971547073369?text=Hi%20Lumariq%2C%20I%27d%20like%20to%20enquire%20about%20a%20project." class="btn-outline" target="_blank" rel="noopener">WhatsApp Us</a>
     </div>
   </div>
 </section>
