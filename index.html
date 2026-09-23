@@ -21,6 +21,8 @@
   --font-secondary: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
   --transition: 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --transition-fast: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  /* side space: 72px minimum, grows on wide screens so content never gets wider than 1300px */
+  --gutter: max(72px, calc((100% - 1300px) / 2));
 }
 
 *, *::before, *::after {
@@ -132,7 +134,7 @@ nav {
   left: 0;
   right: 0;
   z-index: 1000;
-  padding: calc(28px - var(--p) * 8px) 56px;
+  padding: calc(28px - var(--p) * 8px) max(56px, calc((100% - 1300px) / 2));
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -240,7 +242,7 @@ nav {
   justify-content: flex-end;
   min-height: 100vh;
   min-height: 100svh;
-  padding: 140px 72px 96px 72px;
+  padding: 140px var(--gutter) 96px var(--gutter);
   position: relative;
   z-index: 2;
   will-change: transform, opacity;
@@ -519,13 +521,13 @@ nav {
    ABOUT SECTION
 ============================================= */
 .about {
-  padding: 160px 72px;
+  padding: 110px var(--gutter);
   background: var(--deep-brown);
   position: relative;
   overflow: hidden;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 120px;
+  gap: 80px;
   align-items: start;
 }
 
@@ -654,7 +656,7 @@ nav {
    SERVICES SECTION
 ============================================= */
 .services {
-  padding: 160px 72px;
+  padding: 110px var(--gutter);
   background: var(--black);
 }
 
@@ -662,7 +664,7 @@ nav {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 80px;
+  margin-bottom: 56px;
 }
 
 .services h2 {
@@ -795,7 +797,7 @@ nav {
    FEATURED PROJECTS
 ============================================= */
 .projects {
-  padding: 160px 72px;
+  padding: 110px var(--gutter);
   background: var(--deep-brown);
 }
 
@@ -803,7 +805,7 @@ nav {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 80px;
+  margin-bottom: 56px;
 }
 
 .projects h2 {
@@ -858,7 +860,7 @@ nav {
 .project-image {
   width: 100%;
   height: 100%;
-  min-height: 340px;
+  min-height: 210px;
   display: block;
   position: relative;
   overflow: hidden;
@@ -873,7 +875,7 @@ nav {
 }
 
 .project-card:first-child .project-image {
-  min-height: 720px;
+  min-height: 440px;
 }
 
 .project-bg {
@@ -955,20 +957,20 @@ nav {
   .projects-bottom {
   display: flex;
   justify-content: flex-end;
-  margin-top: 60px;
+  margin-top: 40px;
 }
 
 /* =============================================
    PROCESS SECTION
 ============================================= */
 .process {
-  padding: 160px 72px;
+  padding: 110px var(--gutter);
   background: var(--black);
 }
 
 .process-header {
   text-align: center;
-  margin-bottom: 100px;
+  margin-bottom: 64px;
 }
 
 .process h2 {
@@ -1073,7 +1075,7 @@ nav {
 ============================================= */
 .testimonials {
   display: none;   /* hidden for now — still managed in the admin panel */
-  padding: 160px 72px;
+  padding: 110px var(--gutter);
   background: var(--deep-brown);
 }
 
@@ -1158,7 +1160,7 @@ blockquote {
    CTA SECTION
 ============================================= */
 .cta-section {
-  padding: 200px 72px;
+  padding: 120px var(--gutter);
   background: var(--black);
   text-align: center;
   position: relative;
@@ -1248,14 +1250,14 @@ blockquote {
 footer {
   background: var(--black);
   border-top: 1px solid rgba(182,167,149,0.12);
-  padding: 72px 72px 48px;
+  padding: 56px var(--gutter) 36px;
 }
 
 .footer-top {
   display: grid;
   grid-template-columns: 1.5fr 1fr 1fr 1fr;
-  gap: 80px;
-  margin-bottom: 72px;
+  gap: 60px;
+  margin-bottom: 48px;
 }
 
 .footer-brand .brand-name {
@@ -1316,7 +1318,7 @@ footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 36px;
+  padding-top: 28px;
   border-top: 1px solid rgba(182,167,149,0.08);
 }
 
@@ -2145,10 +2147,14 @@ revealEls.forEach(el => window._revealObserver.observe(el));
 /* ----- Smooth Anchor Scroll ----- */
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   anchor.addEventListener('click', function(e) {
-    const target = document.querySelector(this.getAttribute('href'));
+    const href = this.getAttribute('href');
+    if (!href || href.length < 2) return;
+    const target = document.querySelector(href);
     if (target) {
       e.preventDefault();
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Sections shorter than the screen (below the 72px menu) land centered; taller ones land at the top
+      const fits = target.offsetHeight <= window.innerHeight - 72;
+      target.scrollIntoView({ behavior: 'smooth', block: fits ? 'center' : 'start' });
     }
   });
 });
