@@ -168,7 +168,7 @@ async function loadServices() {
 
   grid.innerHTML = data.map((svc, i) => `
     <div class="service-card reveal ${delayClasses[i] || ''}">
-      <span class="service-number">${String(i + 1).padStart(2, '0')}</span>
+      <span class="service-number">${i + 1}</span>
       <svg class="service-icon" viewBox="0 0 36 36" fill="none"
         stroke="rgba(248,239,229,0.5)" stroke-width="1">
         ${icons[i % icons.length]}
@@ -261,13 +261,13 @@ async function loadFeaturedProjects() {
       : `background:linear-gradient(135deg,#1a0d07 0%,#2f1b0e 40%,#0d0806 100%);`;
 
     const meta = [project.category, project.location, project.year].filter(Boolean).join(' · ');
-    const href = `project.html?id=${encodeURIComponent(project.id)}`;
 
-    // Use <a> so it's natively clickable (no JS needed for navigation)
-    const card        = document.createElement('a');
+    // A button, not a link — clicking opens the gallery popup on this
+    // same page instead of navigating away.
+    const card        = document.createElement('button');
+    card.type          = 'button';
     card.className    = `project-card reveal ${delay}`.trim();
-    card.href         = href;
-    card.style.cssText = 'text-decoration:none;color:inherit;display:block;';
+    card.style.cssText = 'text-decoration:none;color:inherit;display:block;width:100%;text-align:left;background:none;border:none;padding:0;font:inherit;';
 
     card.innerHTML = `
       <div class="project-image">
@@ -278,6 +278,8 @@ async function loadFeaturedProjects() {
           <h3 class="project-title">${esc(project.title)}</h3>
         </div>
       </div>`;
+
+    card.addEventListener('click', () => openProjectGallery(project.id, project.title));
 
     grid.appendChild(card);
 
@@ -302,6 +304,56 @@ function addCursorHover(el) {
 /* =============================================
    BOOT — run all loaders in parallel
 ============================================= */
+/* =============================================
+   PROJECT GALLERY POPUP
+   Opened from a Work card — shows that project's
+   photos in a grid, right here on the homepage.
+============================================= */
+let galleryPrevOverflow = '';
+
+async function openProjectGallery(projectId, title) {
+  const modal = document.getElementById('galleryModal');
+  const grid  = document.getElementById('galleryModalGrid');
+  const titleEl = document.getElementById('galleryModalTitle');
+  if (!modal || !grid) return;
+
+  titleEl.textContent = title || '';
+  grid.innerHTML = '<div class="gallery-modal-empty">Loading…</div>';
+  galleryPrevOverflow = document.body.style.overflow;
+  document.body.style.overflow = 'hidden';
+  modal.classList.add('open');
+
+  try {
+    const [{ data: project }, { data: images }] = await Promise.all([
+      sb.from('projects').select('cover_image_url').eq('id', projectId).single(),
+      sb.from('project_images').select('image_url').eq('project_id', projectId).order('sort_order', { ascending: true }),
+    ]);
+
+    const urls = [];
+    if (project?.cover_image_url) urls.push(project.cover_image_url);
+    (images || []).forEach(img => {
+      if (img.image_url && !urls.includes(img.image_url)) urls.push(img.image_url);
+    });
+
+    grid.innerHTML = urls.length
+      ? urls.map(u => `<img src="${esc(u)}" alt="" loading="lazy">`).join('')
+      : '<div class="gallery-modal-empty">No images yet for this project.</div>';
+  } catch (e) {
+    console.error('[site.js] openProjectGallery:', e);
+    grid.innerHTML = '<div class="gallery-modal-empty">Couldn\'t load images.</div>';
+  }
+}
+
+function closeProjectGallery() {
+  const modal = document.getElementById('galleryModal');
+  if (!modal) return;
+  modal.classList.remove('open');
+  document.body.style.overflow = galleryPrevOverflow;
+}
+
+window.openProjectGallery  = openProjectGallery;
+window.closeProjectGallery = closeProjectGallery;
+
 async function bootSite() {
   // Expose the IntersectionObserver so dynamic content can use it
   window._revealObserver = new IntersectionObserver(entries => {
