@@ -21,8 +21,6 @@
   --font-secondary: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
   --transition: 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --transition-fast: 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  /* side space: 72px minimum, grows on wide screens so content never gets wider than 1300px */
-  --gutter: max(72px, calc((100% - 1300px) / 2));
 }
 
 *, *::before, *::after {
@@ -134,14 +132,19 @@ nav {
   left: 0;
   right: 0;
   z-index: 1000;
-  padding: calc(28px - var(--p) * 8px) max(56px, calc((100% - 1300px) / 2));
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  padding: calc(28px - var(--p) * 8px) 56px;
   background: rgba(8, 4, 2, calc(var(--p) * 0.9));
   -webkit-backdrop-filter: blur(calc(var(--p) * 16px));
   backdrop-filter: blur(calc(var(--p) * 16px));
   border-bottom: 1px solid rgba(182, 167, 149, calc(var(--p) * 0.18));
+}
+
+.nav-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .nav-logo {
@@ -242,7 +245,7 @@ nav {
   justify-content: flex-end;
   min-height: 100vh;
   min-height: 100svh;
-  padding: 140px var(--gutter) 96px var(--gutter);
+  padding: 140px 72px 96px 72px;
   position: relative;
   z-index: 2;
   will-change: transform, opacity;
@@ -521,14 +524,20 @@ nav {
    ABOUT SECTION
 ============================================= */
 .about {
-  padding: 110px var(--gutter);
+  padding: 120px 72px;
   background: var(--deep-brown);
   position: relative;
   overflow: hidden;
+}
+
+.about-inner {
+  max-width: 1400px;
+  margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 80px;
+  gap: 120px;
   align-items: start;
+  position: relative;
 }
 
 .about-left,
@@ -652,19 +661,33 @@ nav {
   background-image: radial-gradient(ellipse at 30% 60%, rgba(182,167,149,0.08) 0%, transparent 60%);
 }
 
+.about-spotlight-veil {
+  position: absolute;
+  inset: -20% 0;
+  background: linear-gradient(160deg, #1f0f08 0%, #140a05 55%, #2a1510 100%);
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+/* No cursor on touch devices — show the picture softly all the time instead */
+@media (hover: none) {
+  .about-spotlight-veil { opacity: 0.55; }
+}
+
 /* =============================================
    SERVICES SECTION
 ============================================= */
 .services {
-  padding: 110px var(--gutter);
+  padding: 120px 72px;
   background: var(--black);
 }
 
 .services-header {
+  max-width: 1400px;
+  margin: 0 auto 80px;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 56px;
 }
 
 .services h2 {
@@ -689,6 +712,8 @@ nav {
 }
 
 .services-grid {
+  max-width: 1400px;
+  margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1px;
@@ -734,7 +759,7 @@ nav {
   font-weight: 800;
   letter-spacing: -0.04em;
   color: var(--ivory);
-  opacity: 0.07;
+  opacity: 0.13;
   line-height: 1;
   z-index: 0;
   pointer-events: none;
@@ -743,7 +768,7 @@ nav {
 }
 
 .service-card:hover .service-number {
-  opacity: 0.12;
+  opacity: 0.2;
 }
 
 .service-icon {
@@ -768,12 +793,155 @@ nav {
 }
 
 .service-card p {
+  /* hidden on the card itself — shown in a popup when the card is clicked */
+  display: none;
+}
+
+.service-card {
+  cursor: pointer;
+}
+
+.service-card h3 {
+  margin-bottom: 0;
+}
+
+.service-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background: rgba(4, 2, 1, 0.55);
+  -webkit-backdrop-filter: blur(22px);
+  backdrop-filter: blur(22px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.service-modal.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.service-modal-text {
+  max-width: 640px;
+  text-align: center;
   font-family: var(--font-secondary);
-  font-size: 0.88rem;
-  color: rgba(248,239,229,0.45);
-  line-height: 1.7;
-  position: relative;
-  z-index: 1;
+  font-size: clamp(1.15rem, 2.2vw, 1.45rem);
+  line-height: 1.75;
+  color: var(--ivory);
+  transform: translateY(10px);
+  transition: transform 0.35s ease;
+}
+
+.service-modal.open .service-modal-text {
+  transform: translateY(0);
+}
+
+.gallery-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  background: rgba(4, 2, 1, 0.7);
+  -webkit-backdrop-filter: blur(22px);
+  backdrop-filter: blur(22px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.gallery-modal.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.gallery-modal-box {
+  width: 100%;
+  max-width: 1000px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(10px);
+  transition: transform 0.3s ease;
+}
+
+.gallery-modal.open .gallery-modal-box {
+  transform: translateY(0);
+}
+
+.gallery-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-shrink: 0;
+}
+
+.gallery-modal-title {
+  font-family: var(--font-primary);
+  font-size: 0.7rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ivory);
+}
+
+.gallery-modal-close {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid rgba(182,167,149,0.3);
+  color: var(--ivory);
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.gallery-modal-close:hover {
+  background: rgba(182,167,149,0.12);
+  border-color: var(--taupe);
+}
+
+.gallery-modal-close svg {
+  width: 15px;
+  height: 15px;
+}
+
+.gallery-modal-grid {
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  padding-right: 4px;
+}
+
+.gallery-modal-grid img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+  background: var(--deep-brown);
+}
+
+.gallery-modal-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 0;
+  font-family: var(--font-secondary);
+  font-style: italic;
+  color: rgba(248,239,229,0.4);
+}
+
+@media (max-width: 700px) {
+  .gallery-modal-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 .service-arrow {
@@ -797,15 +965,16 @@ nav {
    FEATURED PROJECTS
 ============================================= */
 .projects {
-  padding: 110px var(--gutter);
+  padding: 120px 72px;
   background: var(--deep-brown);
 }
 
 .projects-header {
+  max-width: 1400px;
+  margin: 0 auto 80px;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 56px;
 }
 
 .projects h2 {
@@ -841,6 +1010,8 @@ nav {
 }
 
 .projects-grid {
+  max-width: 1400px;
+  margin: 0 auto;
   display: grid;
   grid-template-columns: 1.4fr 1fr;
   grid-template-rows: auto auto;
@@ -860,7 +1031,7 @@ nav {
 .project-image {
   width: 100%;
   height: 100%;
-  min-height: 210px;
+  min-height: 260px;
   display: block;
   position: relative;
   overflow: hidden;
@@ -875,7 +1046,7 @@ nav {
 }
 
 .project-card:first-child .project-image {
-  min-height: 440px;
+  min-height: 540px;
 }
 
 .project-bg {
@@ -957,20 +1128,25 @@ nav {
   .projects-bottom {
   display: flex;
   justify-content: flex-end;
-  margin-top: 40px;
+  margin-top: 60px;
 }
 
 /* =============================================
    PROCESS SECTION
 ============================================= */
 .process {
-  padding: 110px var(--gutter);
+  padding: 100px 72px;
   background: var(--black);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .process-header {
+  max-width: 1400px;
+  margin: 0 auto 100px;
   text-align: center;
-  margin-bottom: 64px;
 }
 
 .process h2 {
@@ -987,6 +1163,9 @@ nav {
 }
 
 .process-steps {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   position: relative;
@@ -1075,7 +1254,7 @@ nav {
 ============================================= */
 .testimonials {
   display: none;   /* hidden for now — still managed in the admin panel */
-  padding: 110px var(--gutter);
+  padding: 160px 72px;
   background: var(--deep-brown);
 }
 
@@ -1160,11 +1339,15 @@ blockquote {
    CTA SECTION
 ============================================= */
 .cta-section {
-  padding: 120px var(--gutter);
+  min-height: 100vh;
+  padding: 140px 72px;
   background: var(--black);
   text-align: center;
   position: relative;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .cta-section::before {
@@ -1189,6 +1372,9 @@ blockquote {
 .cta-inner {
   position: relative;
   z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .cta-section .label {
@@ -1244,20 +1430,43 @@ blockquote {
   background: rgba(182,167,149,0.08);
 }
 
+.cta-email {
+  margin-top: 24px;
+  font-family: var(--font-secondary);
+  font-size: 0.85rem;
+  color: rgba(248,239,229,0.4);
+}
+
+.cta-email a {
+  color: var(--taupe);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(182,167,149,0.35);
+}
+
+.cta-email a:hover {
+  color: var(--ivory);
+  border-color: var(--taupe);
+}
+
 /* =============================================
    FOOTER
 ============================================= */
 footer {
   background: var(--black);
   border-top: 1px solid rgba(182,167,149,0.12);
-  padding: 56px var(--gutter) 36px;
+  padding: 56px 72px 36px;
+}
+
+.footer-inner {
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .footer-top {
   display: grid;
   grid-template-columns: 1.5fr 1fr 1fr 1fr;
-  gap: 60px;
-  margin-bottom: 48px;
+  gap: 80px;
+  margin-bottom: 52px;
 }
 
 .footer-brand .brand-name {
@@ -1318,7 +1527,7 @@ footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 28px;
+  padding-top: 36px;
   border-top: 1px solid rgba(182,167,149,0.08);
 }
 
@@ -1725,20 +1934,22 @@ a:focus-visible, button:focus-visible {
      NAVIGATION
 ============================================= -->
 <nav id="mainNav">
-  <a href="#" class="nav-logo" aria-label="Lumariq — home">
-    <img class="logo-cream" src="LOGO%20CREAM.png" alt="Lumariq">
-  </a>
-  <ul class="nav-links">
-    <li><a href="#projects">Work</a></li>
-    <li><a href="#services">Services</a></li>
-    <li><a href="#process">Process</a></li>
-    <li><a href="#about">About</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
-  <a href="#contact" class="nav-cta">Start a project</a>
-  <button class="nav-menu-btn" aria-label="Menu">
-    <span></span><span></span><span></span>
-  </button>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo" aria-label="Lumariq — home">
+      <img class="logo-cream" src="LOGO%20CREAM.png" alt="Lumariq">
+    </a>
+    <ul class="nav-links">
+      <li><a href="#projects">Work</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#process">Process</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <a href="#contact" class="nav-cta">Start a project</a>
+    <button class="nav-menu-btn" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
 </nav>
 
 <!-- =============================================
@@ -1776,7 +1987,9 @@ a:focus-visible, button:focus-visible {
 <section class="about" id="about">
   <div class="about-bg" aria-hidden="true">
     <div class="about-image-inner"></div>
+    <div class="about-spotlight-veil"></div>
   </div>
+  <div class="about-inner">
   <div class="about-left">
     <div class="about-number">A</div>
     <span class="label about-label reveal">01 — About</span>
@@ -1786,8 +1999,8 @@ a:focus-visible, button:focus-visible {
     <p class="reveal">At Lumariq, we believe the spaces around you shape how you feel — and that feeling is worth designing for. We translate emotion into atmosphere, intention into form, and vision into spaces that truly resonate.</p>
     <p class="reveal reveal-delay-1">Our work begins with clarity. We take the time to understand not just what you want a space to look like, but how you want it to feel — then we design every element to honour that intention.</p>
     <p class="reveal reveal-delay-2">From concept to final visualization, every project is precise, considered, and entirely yours. We don't follow trends. We follow the people who will live and move within the space.</p>
-    
     </div>
+  </div>
 </section>
 
 <!-- =============================================
@@ -1806,7 +2019,7 @@ a:focus-visible, button:focus-visible {
 
     <div class="services-grid" id="servicesGrid">
     <div class="service-card reveal">
-      <span class="service-number">01</span>
+      <span class="service-number">1</span>
       <svg class="service-icon" viewBox="0 0 36 36" fill="none" stroke="rgba(248,239,229,0.5)" stroke-width="1">
         <rect x="4" y="4" width="28" height="28"/><line x1="4" y1="14" x2="32" y2="14"/><line x1="14" y1="4" x2="14" y2="32"/>
       </svg>
@@ -1815,7 +2028,7 @@ a:focus-visible, button:focus-visible {
       <span class="service-arrow">→</span>
     </div>
     <div class="service-card reveal reveal-delay-1">
-      <span class="service-number">02</span>
+      <span class="service-number">2</span>
       <svg class="service-icon" viewBox="0 0 36 36" fill="none" stroke="rgba(248,239,229,0.5)" stroke-width="1">
         <polygon points="18,3 33,28 3,28"/><line x1="18" y1="12" x2="18" y2="21"/>
       </svg>
@@ -1824,7 +2037,7 @@ a:focus-visible, button:focus-visible {
       <span class="service-arrow">→</span>
     </div>
     <div class="service-card reveal reveal-delay-2">
-      <span class="service-number">03</span>
+      <span class="service-number">3</span>
       <svg class="service-icon" viewBox="0 0 36 36" fill="none" stroke="rgba(248,239,229,0.5)" stroke-width="1">
         <circle cx="18" cy="18" r="12"/><circle cx="18" cy="18" r="5"/><line x1="18" y1="3" x2="18" y2="8"/><line x1="18" y1="28" x2="18" y2="33"/>
       </svg>
@@ -1833,7 +2046,7 @@ a:focus-visible, button:focus-visible {
       <span class="service-arrow">→</span>
     </div>
     <div class="service-card reveal reveal-delay-3">
-      <span class="service-number">04</span>
+      <span class="service-number">4</span>
       <svg class="service-icon" viewBox="0 0 36 36" fill="none" stroke="rgba(248,239,229,0.5)" stroke-width="1">
         <circle cx="18" cy="18" r="14"/><ellipse cx="18" cy="18" rx="6" ry="14"/><line x1="4" y1="18" x2="32" y2="18"/>
       </svg>
@@ -1842,7 +2055,7 @@ a:focus-visible, button:focus-visible {
       <span class="service-arrow">→</span>
     </div>
     <div class="service-card reveal reveal-delay-4">
-      <span class="service-number">05</span>
+      <span class="service-number">5</span>
       <svg class="service-icon" viewBox="0 0 36 36" fill="none" stroke="rgba(248,239,229,0.5)" stroke-width="1">
         <circle cx="18" cy="12" r="7"/><path d="M4 32 C4 24 32 24 32 32"/>
       </svg>
@@ -1851,7 +2064,7 @@ a:focus-visible, button:focus-visible {
       <span class="service-arrow">→</span>
     </div>
     <div class="service-card reveal reveal-delay-5">
-      <span class="service-number">06</span>
+      <span class="service-number">6</span>
       <svg class="service-icon" viewBox="0 0 36 36" fill="none" stroke="rgba(248,239,229,0.5)" stroke-width="1">
         <rect x="3" y="3" width="30" height="22"/><line x1="3" y1="10" x2="33" y2="10"/><circle cx="8" cy="6.5" r="1.5"/>
       </svg>
@@ -1875,12 +2088,6 @@ a:focus-visible, button:focus-visible {
 
   <div class="projects-grid" id="projectsGrid">
     <!-- Projects will be loaded dynamically -->
-  </div>
-
-  <div class="projects-bottom">
-    <a href="#" class="view-all reveal">
-      View All Projects →
-    </a>
   </div>
 </section>
 
@@ -1973,6 +2180,7 @@ a:focus-visible, button:focus-visible {
       <a href="mailto:hello@lumariq.com" class="btn-primary">Get in Touch</a>
       <a href="https://wa.me/971547073369?text=Hi%20Lumariq%2C%20I%27d%20like%20to%20enquire%20about%20a%20project." class="btn-outline" target="_blank" rel="noopener">WhatsApp Us</a>
     </div>
+    <p class="cta-email reveal reveal-delay-3">or write to <a href="mailto:hello@lumariq.com">hello@lumariq.com</a></p>
   </div>
 </section>
 
@@ -1980,6 +2188,7 @@ a:focus-visible, button:focus-visible {
      FOOTER
 ============================================= -->
 <footer>
+  <div class="footer-inner">
   <div class="footer-top">
     <div class="footer-brand">
       <a href="#" class="brand-name" aria-label="Lumariq — home"><img src="LOGO%20CREAM.png" alt="Lumariq"></a>
@@ -2018,7 +2227,30 @@ a:focus-visible, button:focus-visible {
       <a href="#">Cookies</a>
     </div>
   </div>
+  </div>
 </footer>
+
+<!-- Service description popup -->
+<div class="service-modal" id="serviceModal">
+  <p class="service-modal-text" id="serviceModalText"></p>
+</div>
+
+<!-- Project gallery popup -->
+<div class="gallery-modal" id="galleryModal">
+  <div class="gallery-modal-box">
+    <div class="gallery-modal-head">
+      <span class="gallery-modal-title" id="galleryModalTitle"></span>
+      <button class="gallery-modal-close" id="galleryModalClose" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="gallery-modal-grid" id="galleryModalGrid"></div>
+  </div>
+</div>
+
 
 <!-- =============================================
      JAVASCRIPT
@@ -2098,6 +2330,23 @@ function onScrollFrame() {
   scrollTicking = false;
 }
 
+/* About: a small "torch" reveals the picture where the mouse points */
+const aboutVeil = document.querySelector('.about-spotlight-veil');
+if (aboutSection && aboutVeil) {
+  aboutSection.addEventListener('mousemove', e => {
+    const r = aboutSection.getBoundingClientRect();
+    const x = (((e.clientX - r.left) / r.width) * 100).toFixed(1);
+    const y = (((e.clientY - r.top) / r.height) * 100).toFixed(1);
+    const hole = `radial-gradient(circle 200px at ${x}% ${y}%, transparent 0%, transparent 45%, black 75%, black 100%)`;
+    aboutVeil.style.webkitMaskImage = hole;
+    aboutVeil.style.maskImage = hole;
+  });
+  aboutSection.addEventListener('mouseleave', () => {
+    aboutVeil.style.webkitMaskImage = '';
+    aboutVeil.style.maskImage = '';
+  });
+}
+
 window.addEventListener('scroll', () => {
   if (!scrollTicking) { requestAnimationFrame(onScrollFrame); scrollTicking = true; }
 }, { passive: true });
@@ -2144,17 +2393,50 @@ window._revealObserver = new IntersectionObserver((entries) => {
 
 revealEls.forEach(el => window._revealObserver.observe(el));
 
+/* ----- Service card: click to read the description ----- */
+const serviceModal = document.getElementById('serviceModal');
+const serviceModalText = document.getElementById('serviceModalText');
+
+function openServiceModal(text) {
+  if (!serviceModal || !text) return;
+  serviceModalText.textContent = text;
+  serviceModal.classList.add('open');
+}
+function closeServiceModal() {
+  serviceModal?.classList.remove('open');
+}
+
+document.addEventListener('click', e => {
+  const card = e.target.closest('.service-card');
+  if (card) {
+    const desc = card.querySelector('p');
+    openServiceModal(desc ? desc.textContent : '');
+    return;
+  }
+  if (e.target === serviceModal) closeServiceModal();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeServiceModal();
+});
+
+/* ----- Project gallery popup: opened by site.js when a Work card is clicked ----- */
+const galleryModal = document.getElementById('galleryModal');
+document.getElementById('galleryModalClose')?.addEventListener('click', () => window.closeProjectGallery());
+galleryModal?.addEventListener('click', e => {
+  if (e.target === galleryModal) window.closeProjectGallery();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') window.closeProjectGallery?.();
+});
+
 /* ----- Smooth Anchor Scroll ----- */
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   anchor.addEventListener('click', function(e) {
-    const href = this.getAttribute('href');
-    if (!href || href.length < 2) return;
-    const target = document.querySelector(href);
+    const target = document.querySelector(this.getAttribute('href'));
     if (target) {
       e.preventDefault();
-      // Sections shorter than the screen (below the 72px menu) land centered; taller ones land at the top
-      const fits = target.offsetHeight <= window.innerHeight - 72;
-      target.scrollIntoView({ behavior: 'smooth', block: fits ? 'center' : 'start' });
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   });
 });
