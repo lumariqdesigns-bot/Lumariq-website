@@ -637,10 +637,10 @@ nav {
   position: absolute;
   inset: 0;
   background: linear-gradient(to bottom,
-    rgba(0,0,0,0.92) 0%,
-    rgba(8,4,2,0.72) 22%,
-    rgba(8,4,2,0.72) 78%,
-    rgba(0,0,0,0.92) 100%);
+    rgba(0,0,0,0.6) 0%,
+    rgba(8,4,2,0.3) 22%,
+    rgba(8,4,2,0.3) 78%,
+    rgba(0,0,0,0.6) 100%);
   pointer-events: none;
 }
 
@@ -659,19 +659,6 @@ nav {
   position: absolute;
   inset: 0;
   background-image: radial-gradient(ellipse at 30% 60%, rgba(182,167,149,0.08) 0%, transparent 60%);
-}
-
-.about-spotlight-veil {
-  position: absolute;
-  inset: -20% 0;
-  background: linear-gradient(160deg, #1f0f08 0%, #140a05 55%, #2a1510 100%);
-  pointer-events: none;
-  transition: opacity 0.4s ease;
-}
-
-/* No cursor on touch devices — show the picture softly all the time instead */
-@media (hover: none) {
-  .about-spotlight-veil { opacity: 0.55; }
 }
 
 /* =============================================
@@ -1413,6 +1400,11 @@ blockquote {
   gap: 40px;
 }
 
+.cta-buttons a {
+  min-width: 190px;
+  text-align: center;
+}
+
 .btn-outline {
   font-family: var(--font-primary);
   font-size: 0.68rem;
@@ -1428,24 +1420,6 @@ blockquote {
 .btn-outline:hover {
   border-color: var(--taupe);
   background: rgba(182,167,149,0.08);
-}
-
-.cta-email {
-  margin-top: 24px;
-  font-family: var(--font-secondary);
-  font-size: 0.85rem;
-  color: rgba(248,239,229,0.4);
-}
-
-.cta-email a {
-  color: var(--taupe);
-  text-decoration: none;
-  border-bottom: 1px solid rgba(182,167,149,0.35);
-}
-
-.cta-email a:hover {
-  color: var(--ivory);
-  border-color: var(--taupe);
 }
 
 /* =============================================
@@ -1987,7 +1961,6 @@ a:focus-visible, button:focus-visible {
 <section class="about" id="about">
   <div class="about-bg" aria-hidden="true">
     <div class="about-image-inner"></div>
-    <div class="about-spotlight-veil"></div>
   </div>
   <div class="about-inner">
   <div class="about-left">
@@ -2177,10 +2150,9 @@ a:focus-visible, button:focus-visible {
     <h2 class="reveal reveal-delay-1">Let's create<br>something <em>timeless.</em></h2>
     <p class="cta-sub reveal reveal-delay-2">We work with a small number of exceptional clients each year. If you are ready to begin, we would be honoured to hear from you.</p>
     <div class="cta-buttons reveal reveal-delay-3">
-      <a href="mailto:hello@lumariq.com" class="btn-primary">Get in Touch</a>
+      <a href="mailto:hello@lumariq.com" class="btn-primary" id="getInTouchBtn">Get in Touch</a>
       <a href="https://wa.me/971547073369?text=Hi%20Lumariq%2C%20I%27d%20like%20to%20enquire%20about%20a%20project." class="btn-outline" target="_blank" rel="noopener">WhatsApp Us</a>
     </div>
-    <p class="cta-email reveal reveal-delay-3">or write to <a href="mailto:hello@lumariq.com">hello@lumariq.com</a></p>
   </div>
 </section>
 
@@ -2330,23 +2302,6 @@ function onScrollFrame() {
   scrollTicking = false;
 }
 
-/* About: a small "torch" reveals the picture where the mouse points */
-const aboutVeil = document.querySelector('.about-spotlight-veil');
-if (aboutSection && aboutVeil) {
-  aboutSection.addEventListener('mousemove', e => {
-    const r = aboutSection.getBoundingClientRect();
-    const x = (((e.clientX - r.left) / r.width) * 100).toFixed(1);
-    const y = (((e.clientY - r.top) / r.height) * 100).toFixed(1);
-    const hole = `radial-gradient(circle 200px at ${x}% ${y}%, transparent 0%, transparent 45%, black 75%, black 100%)`;
-    aboutVeil.style.webkitMaskImage = hole;
-    aboutVeil.style.maskImage = hole;
-  });
-  aboutSection.addEventListener('mouseleave', () => {
-    aboutVeil.style.webkitMaskImage = '';
-    aboutVeil.style.maskImage = '';
-  });
-}
-
 window.addEventListener('scroll', () => {
   if (!scrollTicking) { requestAnimationFrame(onScrollFrame); scrollTicking = true; }
 }, { passive: true });
@@ -2428,6 +2383,16 @@ galleryModal?.addEventListener('click', e => {
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') window.closeProjectGallery?.();
+});
+
+/* ----- Get in Touch: always visibly does something, even with no email app ----- */
+const getInTouchBtn = document.getElementById('getInTouchBtn');
+getInTouchBtn?.addEventListener('click', () => {
+  const email = 'hello@lumariq.com';
+  navigator.clipboard?.writeText(email).catch(() => {});
+  const original = getInTouchBtn.textContent;
+  getInTouchBtn.textContent = 'Copied — paste to email';
+  setTimeout(() => { getInTouchBtn.textContent = original; }, 2200);
 });
 
 /* ----- Smooth Anchor Scroll ----- */
