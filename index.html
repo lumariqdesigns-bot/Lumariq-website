@@ -6,7 +6,7 @@
 <title>LUMARIQ — Interior Design & Visualization Studio</title>
 <link rel="icon" type="image/png" href="FAVICON.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet">
 <style>
 /* =============================================
    CSS VARIABLES & RESET
@@ -1896,13 +1896,313 @@ a:focus-visible, button:focus-visible {
   }
   .marquee-track { animation: none; }
 }
+
+/* =========================================================
+   LUMARIQ — QUIET LUXURY RESTYLE
+   Visual layer over the existing structure/CMS.
+========================================================= */
+:root {
+  --black: #1C1C1C;
+  --deep-brown: #24201C;
+  --ivory: #FAF9F6;
+  --taupe: #BFAE99;
+  --stone: #E9E3D7;
+  --sand: #E9E3D7;
+  --charcoal: #1C1C1C;
+  --logo-dark: #3E3A37;
+  --font-primary: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+  --font-secondary: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --transition: 0.55s cubic-bezier(.22,.61,.36,1);
+  --transition-fast: 0.3s ease;
+}
+
+html { scroll-padding-top: 84px; }
+body { background: var(--charcoal); color: var(--logo-dark); cursor: auto !important; }
+a, button, .service-card, .project-card, .process-step { cursor: pointer !important; }
+.cursor, .cursor-follower { display:none !important; }
+
+/* Type */
+h1, h2, h3, h4, h5 { font-family: var(--font-primary); }
+.hero h1, .about h2, .services h2, .projects h2, .process h2, .cta-section h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.025em;
+}
+.hero h1 em, .about h2 em, .services h2 em, .projects h2 em, .process h2 em, .cta-section h2 em {
+  font-family: var(--font-display);
+  font-weight: 400;
+}
+
+/* Quiet reveal: content appears, it doesn't perform. */
+.reveal, .reveal.visible {
+  transform: none;
+}
+.reveal { opacity: 0; transition: opacity .7s ease; }
+.reveal.visible { opacity: 1; }
+.reveal-delay-1,.reveal-delay-2,.reveal-delay-3,.reveal-delay-4,.reveal-delay-5 { transition-delay: 0s; }
+
+/* Navigation */
+nav {
+  padding: 26px 56px;
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  transition: background .35s ease, border-color .35s ease, padding .35s ease, color .35s ease;
+}
+nav[style*="--p: 1"], nav.nav-scrolled {
+  background: rgba(28,28,28,.92);
+  border-color: rgba(233,227,215,.12);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.nav-links { gap: 38px; }
+.nav-links a { color: rgba(250,249,246,.82); font-size: .67rem; letter-spacing: .16em; }
+.nav-links a::after { background: currentColor; }
+.nav-cta {
+  border: 0;
+  border-bottom: 1px solid rgba(250,249,246,.55);
+  padding: 5px 0;
+  color: var(--ivory);
+  letter-spacing: .16em;
+}
+.nav-cta:hover { background: transparent; color: var(--taupe); border-color: var(--taupe); }
+nav.nav-light {
+  background: rgba(233,227,215,.96) !important;
+  border-color: rgba(62,58,55,.10) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+nav.nav-light .nav-links a, nav.nav-light .nav-cta { color: var(--logo-dark); }
+nav.nav-light .nav-links a::after { background: var(--logo-dark); }
+nav.nav-light .nav-cta { border-color: rgba(62,58,55,.45); }
+nav.nav-light .nav-logo img { filter: brightness(0) saturate(100%) invert(22%) sepia(8%) saturate(400%) hue-rotate(345deg) brightness(91%) contrast(90%); }
+
+/* Hero */
+.hero { background: var(--charcoal); }
+.hero-content { padding: 150px 72px 90px; }
+.hero h1 { font-size: clamp(4rem, 7vw, 7.5rem); line-height: .88; max-width: 850px; }
+.hero h1 em { color: var(--taupe); }
+.hero-label { color: rgba(250,249,246,.72); margin-bottom: 26px; }
+.hero-para { max-width: 470px; font-size: .92rem; color: rgba(250,249,246,.72); margin-bottom: 36px; }
+.hero-section::after {
+  background: linear-gradient(to bottom, rgba(28,28,28,.42), rgba(28,28,28,.08) 42%, rgba(28,28,28,.48));
+}
+.hero-scroll-indicator { right: 48px; bottom: 42px; }
+.scroll-line { background: linear-gradient(to bottom, var(--taupe), transparent); }
+.hero-work-link { color: var(--ivory); font-size: .78rem; letter-spacing: .16em; text-transform: uppercase; }
+.hero-work-link:hover { color: var(--taupe); }
+
+/* Remove unused decorative strip */
+.marquee-strip { display:none !important; }
+
+/* About — light editorial */
+.about {
+  padding: 150px 72px;
+  background: var(--sand);
+  color: var(--logo-dark);
+}
+.about-bg { display:none; }
+.about-inner { max-width: 1320px; grid-template-columns: minmax(300px,.9fr) minmax(420px,1.1fr); gap: 110px; }
+.about-label { color: #817568; }
+.about h2 { color: var(--logo-dark); font-size: clamp(3rem, 5vw, 5.4rem); max-width: 600px; }
+.about h2 em { color: #8D7965; }
+.about-right { padding-top: 52px; max-width: 620px; }
+.about-right p { color: #4F4943; opacity: 1; font-size: 1rem; line-height: 1.9; margin-bottom: 26px; }
+.about-number { display:none !important; }
+.about-stats { border-color: rgba(62,58,55,.16); }
+.stat h3 { color: var(--logo-dark); }
+.stat p { color: #817568; }
+
+/* Services — editorial rows */
+.services { padding: 145px 72px; background: var(--charcoal); }
+.services-header { max-width: 1320px; margin-bottom: 76px; }
+.services h2 { font-size: clamp(3rem,5vw,5.2rem); }
+.services-header-right p { color: rgba(250,249,246,.48); line-height: 1.8; }
+.services-grid {
+  max-width: 1320px;
+  display:block;
+  background: transparent;
+  border-top: 1px solid rgba(233,227,215,.18);
+}
+.service-card {
+  display:grid;
+  grid-template-columns: 70px minmax(180px,.7fr) minmax(300px,1fr) 30px;
+  align-items:center;
+  gap: 28px;
+  min-height: 125px;
+  padding: 28px 0;
+  background: transparent;
+  border-bottom: 1px solid rgba(233,227,215,.14);
+  transition: padding .35s ease, background .35s ease;
+  cursor: pointer;
+}
+.service-card::before { display:none; }
+.service-card:hover { background: rgba(233,227,215,.035); padding-left: 18px; padding-right: 18px; }
+.service-number {
+  position:static;
+  font-size: .68rem;
+  font-weight:400;
+  color: var(--taupe);
+  opacity:1;
+  letter-spacing:.16em;
+  line-height:1;
+}
+.service-main { display:contents; }
+.service-icon { display:none; }
+.service-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight:500;
+  letter-spacing:-.01em;
+  color: var(--ivory);
+  margin:0;
+}
+.service-card p {
+  display:block;
+  font-size:.83rem;
+  line-height:1.7;
+  color: rgba(250,249,246,.48);
+  margin:0;
+  max-width:620px;
+}
+.service-arrow {
+  position:static;
+  display:block;
+  opacity:1;
+  transform:none;
+  color: var(--taupe);
+  font-size:1.05rem;
+  transition: transform .3s ease, color .3s ease;
+}
+.service-card:hover .service-arrow { opacity:1; transform:translate(3px,-3px); color:var(--ivory); }
+.service-card:hover .service-number { opacity:1; }
+.service-modal { display:none !important; }
+
+/* Work — light gallery/editorial */
+.projects { padding: 150px 72px; background: var(--sand); }
+.projects-header { max-width:1320px; margin-bottom:70px; }
+.projects h2 { color:var(--logo-dark); font-size:clamp(3rem,5vw,5.2rem); }
+.projects h2 em { color:#8D7965; }
+.projects .label { color:#817568; }
+.projects-grid { max-width:1320px; gap:28px; }
+.project-card { cursor:pointer; }
+.project-image { background:#d8cec0; }
+.project-bg { transition: transform .9s cubic-bezier(.22,.61,.36,1); }
+.project-overlay { opacity:1 !important; background:linear-gradient(to top, rgba(28,28,28,.66), rgba(28,28,28,0) 55%) !important; transition:none; }
+.project-info { transform:none !important; padding:30px; }
+.project-category { color:#D4C2AB; margin-bottom:9px; }
+.project-title { color:var(--ivory); font-family:var(--font-display); font-size:1.55rem; font-weight:500; }
+.project-card:first-child .project-title { font-size:2rem; }
+.project-card:hover .project-bg { transform:scale(1.025); }
+.projects-bottom { margin-top:55px; }
+.view-all { color:var(--logo-dark); border-color:#8D7965; }
+.view-all:hover { color:#8D7965; }
+
+/* Process — calm vertical editorial list */
+.process { min-height:auto; padding:145px 72px; background:var(--charcoal); }
+.process-header { max-width:1320px; text-align:left; margin:0 auto 70px; }
+.process h2 { font-size:clamp(3rem,5vw,5.2rem); }
+.process-steps { max-width:1320px; display:block; }
+.process-steps::before { display:none; }
+.process-step {
+  display:grid;
+  grid-template-columns:80px 190px minmax(280px,1fr);
+  grid-template-areas:"num title text";
+  align-items:start;
+  gap:30px;
+  padding:34px 0;
+  border-top:1px solid rgba(233,227,215,.14);
+  text-align:left;
+}
+.process-step:last-child { border-bottom:1px solid rgba(233,227,215,.14); }
+.step-dot { grid-area:num; width:auto; height:auto; border:0; border-radius:0; background:none; margin:0; justify-content:flex-start; }
+.step-dot span { color:var(--taupe); font-family:var(--font-primary); font-size:.68rem; letter-spacing:.16em; }
+.process-step:hover .step-dot { background:none; border:0; }
+.process-step:hover .step-dot span { color:var(--taupe); }
+.step-num { display:none; }
+.process-step h3 { grid-area:title; margin:0; font-family:var(--font-display); font-size:1.8rem; font-weight:500; text-transform:none; letter-spacing:0; color:var(--ivory); }
+.process-step p:last-child { grid-area:text; margin:0; font-size:.86rem; line-height:1.8; color:rgba(250,249,246,.48); max-width:650px; }
+
+/* Testimonials remain hidden intentionally, as in the source */
+.testimonials { display:none !important; }
+
+/* Contact — dark, confident close */
+.cta-section { min-height:72vh; padding:130px 72px; background:var(--charcoal); }
+.cta-section::before, .cta-section::after { display:none; }
+.cta-inner { max-width:1320px; text-align:left; }
+.cta-section h2 { font-size:clamp(4rem,7vw,7.8rem); max-width:900px; margin-bottom:38px; }
+.cta-section .cta-sub { margin:0 0 45px; max-width:500px; font-size:.94rem; color:rgba(250,249,246,.5); text-align:left; }
+.cta-buttons { justify-content:flex-start; gap:28px; }
+.btn-primary { padding:15px 28px; font-size:.66rem; letter-spacing:.17em; }
+.cta-buttons .btn-text-link { color:var(--ivory); font-size:.75rem; letter-spacing:.16em; text-transform:uppercase; }
+.cta-buttons .btn-text-link:hover { color:var(--taupe); }
+
+/* Footer */
+footer { background:var(--charcoal); border-top:1px solid rgba(233,227,215,.12); padding:70px 72px 34px; }
+.footer-minimal { max-width:1320px; margin:0 auto; display:grid; grid-template-columns:2fr 1fr 1fr; gap:70px; padding-bottom:70px; }
+.footer-brand img { height:23px; width:auto; display:block; margin-bottom:22px; }
+.footer-brand p, .footer-brand > span { display:block; color:rgba(250,249,246,.5); font-size:.78rem; line-height:1.8; }
+.footer-brand > span { margin-top:2px; color:var(--taupe); font-size:.68rem; letter-spacing:.16em; text-transform:uppercase; }
+.footer-contact { display:flex; flex-direction:column; gap:13px; }
+.footer-kicker { color:var(--taupe); font-size:.61rem; letter-spacing:.2em; text-transform:uppercase; }
+.footer-contact a { color:rgba(250,249,246,.72); text-decoration:none; font-size:.8rem; }
+.footer-contact a:hover { color:var(--ivory); }
+.footer-socials { display:flex; flex-direction:column; gap:9px; }
+.footer-bottom { max-width:1320px; margin:0 auto; padding-top:22px; border-top:1px solid rgba(233,227,215,.10); display:flex; justify-content:space-between; gap:30px; }
+.footer-bottom p { color:rgba(250,249,246,.35); font-size:.64rem; }
+.footer-bottom a { color:rgba(250,249,246,.55); text-decoration:none; }
+
+/* Gallery stays functional, but visually quiet */
+.gallery-modal { background:rgba(28,28,28,.88); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); }
+.gallery-modal-close { border-color:rgba(233,227,215,.25); }
+
+/* Mobile */
+@media (max-width:900px) {
+  nav { padding:22px 28px; }
+  nav.nav-light .nav-menu-btn span { background:var(--logo-dark); }
+  .hero-content { padding:125px 32px 78px; }
+  .hero h1 { font-size:clamp(3.2rem,12vw,5.5rem); }
+  .about, .services, .projects, .process, .cta-section { padding-left:32px; padding-right:32px; }
+  .about-inner { grid-template-columns:1fr; gap:45px; }
+  .about-right { padding-top:0; }
+  .services-header, .projects-header { margin-bottom:55px; }
+  .service-card { grid-template-columns:48px 1fr 24px; gap:18px; min-height:auto; padding:25px 0; }
+  .service-card h3 { font-size:1.55rem; }
+  .service-card p { grid-column:2 / 3; margin-top:-5px; }
+  .service-arrow { grid-column:3; grid-row:1 / span 2; }
+  .process-step { grid-template-columns:50px 1fr; grid-template-areas:"num title" "num text"; gap:8px 20px; padding:28px 0; }
+  .process-step h3 { font-size:1.55rem; }
+  .process-step p:last-child { grid-column:2; }
+  .cta-inner { text-align:left; }
+  .cta-section h2 { font-size:clamp(3.5rem,12vw,6rem); }
+  .footer-minimal { grid-template-columns:1fr 1fr; gap:48px; }
+  .footer-brand { grid-column:1 / -1; }
+  .footer-bottom { flex-direction:column; gap:8px; }
+}
+@media (max-width:600px) {
+  .hero-content { padding:120px 24px 72px; }
+  .hero h1 { font-size:clamp(3rem,15vw,4.7rem); }
+  .hero-para { font-size:.84rem; max-width:350px; }
+  .about, .services, .projects, .process, .cta-section { padding-left:24px; padding-right:24px; }
+  .about { padding-top:105px; padding-bottom:105px; }
+  .services, .projects, .process { padding-top:105px; padding-bottom:105px; }
+  .service-card { grid-template-columns:34px 1fr 20px; gap:13px; }
+  .service-card h3 { font-size:1.35rem; }
+  .service-card p { font-size:.76rem; }
+  .project-info { padding:20px; }
+  .project-title, .project-card:first-child .project-title { font-size:1.45rem; }
+  .process-step { grid-template-columns:40px 1fr; }
+  .cta-section { min-height:65vh; padding-top:105px; padding-bottom:105px; }
+  .footer-minimal { grid-template-columns:1fr; gap:36px; }
+  .footer-brand { grid-column:auto; }
+  footer { padding-left:24px; padding-right:24px; }
+}
+
 </style>
 </head>
 <body>
-
-<!-- Custom Cursor -->
-<div class="cursor" id="cursor"></div>
-<div class="cursor-follower" id="cursorFollower"></div>
 
 <!-- =============================================
      NAVIGATION
@@ -1935,8 +2235,7 @@ a:focus-visible, button:focus-visible {
     <h1 id="heroTitle">We design<br>what you <em>feel.</em></h1>
     <p class="hero-para" id="heroPara">Interior and exterior design and visualization for the UAE, Saudi Arabia, India and Qatar.</p>
     <div class="hero-actions">
-      <a href="#projects" class="btn-primary">See our work</a>
-      <a href="#contact" class="btn-outline">Start a project</a>
+      <a href="#projects" class="btn-text-link hero-work-link">Explore our work</a>
     </div>
   </div>
 
@@ -1964,9 +2263,8 @@ a:focus-visible, button:focus-visible {
   </div>
   <div class="about-inner">
   <div class="about-left">
-    <div class="about-number">A</div>
     <span class="label about-label reveal">01 — About</span>
-    <h2 class="reveal reveal-delay-1">Design that speaks<br>to what you <em>feel.</em></h2>
+    <h2 class="reveal reveal-delay-1">Design that begins<br>with a <em>feeling.</em></h2>
   </div>
   <div class="about-right">
     <p class="reveal">At Lumariq, we believe the spaces around you shape how you feel — and that feeling is worth designing for. We translate emotion into atmosphere, intention into form, and vision into spaces that truly resonate.</p>
@@ -1991,59 +2289,36 @@ a:focus-visible, button:focus-visible {
   </div>
 
     <div class="services-grid" id="servicesGrid">
-    <div class="service-card reveal">
-      <span class="service-number">1</span>
-      <svg class="service-icon" viewBox="0 0 36 36" fill="none" stroke="rgba(248,239,229,0.5)" stroke-width="1">
-        <rect x="4" y="4" width="28" height="28"/><line x1="4" y1="14" x2="32" y2="14"/><line x1="14" y1="4" x2="14" y2="32"/>
-      </svg>
-      <h3>Interior Design</h3>
-      <p>Emotion-led interior concepts designed around atmosphere, materiality, and spatial experience.</p>
-      <span class="service-arrow">→</span>
-    </div>
-    <div class="service-card reveal reveal-delay-1">
-      <span class="service-number">2</span>
-      <svg class="service-icon" viewBox="0 0 36 36" fill="none" stroke="rgba(248,239,229,0.5)" stroke-width="1">
-        <polygon points="18,3 33,28 3,28"/><line x1="18" y1="12" x2="18" y2="21"/>
-      </svg>
-      <h3>Exterior Design</h3>
-      <p>Architectural exterior concepts crafted to shape presence, proportion, and visual identity.</p>
-      <span class="service-arrow">→</span>
-    </div>
-    <div class="service-card reveal reveal-delay-2">
-      <span class="service-number">3</span>
-      <svg class="service-icon" viewBox="0 0 36 36" fill="none" stroke="rgba(248,239,229,0.5)" stroke-width="1">
-        <circle cx="18" cy="18" r="12"/><circle cx="18" cy="18" r="5"/><line x1="18" y1="3" x2="18" y2="8"/><line x1="18" y1="28" x2="18" y2="33"/>
-      </svg>
-      <h3>360° Walkthrough Experience</h3>
-      <p>Immersive walkthrough experiences that allow clients to explore spaces before they are built.</p>
-      <span class="service-arrow">→</span>
-    </div>
-    <div class="service-card reveal reveal-delay-3">
-      <span class="service-number">4</span>
-      <svg class="service-icon" viewBox="0 0 36 36" fill="none" stroke="rgba(248,239,229,0.5)" stroke-width="1">
-        <circle cx="18" cy="18" r="14"/><ellipse cx="18" cy="18" rx="6" ry="14"/><line x1="4" y1="18" x2="32" y2="18"/>
-      </svg>
-      <h3>Spatial Planning</h3>
-      <p>Intelligent layouts designed to improve flow, functionality, balance, and everyday interaction within a space.</p>
-      <span class="service-arrow">→</span>
-    </div>
-    <div class="service-card reveal reveal-delay-4">
-      <span class="service-number">5</span>
-      <svg class="service-icon" viewBox="0 0 36 36" fill="none" stroke="rgba(248,239,229,0.5)" stroke-width="1">
-        <circle cx="18" cy="12" r="7"/><path d="M4 32 C4 24 32 24 32 32"/>
-      </svg>
-      <h3>Technical Drawings</h3>
-      <p>Precise technical documentation prepared for coordination, detailing, and execution support.</p>
-      <span class="service-arrow">→</span>
-    </div>
-    <div class="service-card reveal reveal-delay-5">
-      <span class="service-number">6</span>
-      <svg class="service-icon" viewBox="0 0 36 36" fill="none" stroke="rgba(248,239,229,0.5)" stroke-width="1">
-        <rect x="3" y="3" width="30" height="22"/><line x1="3" y1="10" x2="33" y2="10"/><circle cx="8" cy="6.5" r="1.5"/>
-      </svg>
-      <h3>Video Visualization</h3>
-      <p>Animated walkthroughs crafted to present atmosphere, lighting, and realistic spatial experience.</p>
-      <span class="service-arrow">→</span>
+      <div class="service-card reveal">
+        <span class="service-number">01</span>
+        <div class="service-main"><h3>Interior Design</h3><p>Emotion-led interior concepts designed around atmosphere, materiality, and spatial experience.</p></div>
+        <span class="service-arrow">↗</span>
+      </div>
+      <div class="service-card reveal">
+        <span class="service-number">02</span>
+        <div class="service-main"><h3>Exterior Design</h3><p>Architectural exterior concepts crafted to shape presence, proportion, and visual identity.</p></div>
+        <span class="service-arrow">↗</span>
+      </div>
+      <div class="service-card reveal">
+        <span class="service-number">03</span>
+        <div class="service-main"><h3>360° Walkthrough Experience</h3><p>Immersive walkthrough experiences that allow clients to explore spaces before they are built.</p></div>
+        <span class="service-arrow">↗</span>
+      </div>
+      <div class="service-card reveal">
+        <span class="service-number">04</span>
+        <div class="service-main"><h3>Spatial Planning</h3><p>Intelligent layouts designed to improve flow, functionality, balance, and everyday interaction within a space.</p></div>
+        <span class="service-arrow">↗</span>
+      </div>
+      <div class="service-card reveal">
+        <span class="service-number">05</span>
+        <div class="service-main"><h3>Technical Drawings</h3><p>Precise technical documentation prepared for coordination, detailing, and execution support.</p></div>
+        <span class="service-arrow">↗</span>
+      </div>
+      <div class="service-card reveal">
+        <span class="service-number">06</span>
+        <div class="service-main"><h3>Video Visualization</h3><p>Animated walkthroughs crafted to present atmosphere, lighting, and realistic spatial experience.</p></div>
+        <span class="service-arrow">↗</span>
+      </div>
     </div>
   </div>
 </section>
@@ -2075,31 +2350,31 @@ a:focus-visible, button:focus-visible {
 
   <div class="process-steps">
     <div class="process-step reveal">
-      <div class="step-dot"><span>I</span></div>
+<div class="step-dot"><span>01</span></div>
       <p class="step-num">Step 01</p>
       <h3>Discover</h3>
       <p>We begin by listening. Understanding your brief, your lifestyle, and the emotional quality you want the space to carry.</p>
     </div>
     <div class="process-step reveal reveal-delay-1">
-      <div class="step-dot"><span>II</span></div>
+      <div class="step-dot"><span>02</span></div>
       <p class="step-num">Step 02</p>
       <h3>Define</h3>
       <p>We translate your vision into a clear design direction — mood boards, spatial strategy, material palette, and conceptual intent.</p>
     </div>
     <div class="process-step reveal reveal-delay-2">
-      <div class="step-dot"><span>III</span></div>
+      <div class="step-dot"><span>03</span></div>
       <p class="step-num">Step 03</p>
       <h3>Design</h3>
       <p>Layouts, elevations, and detailed spatial compositions are developed — every proportion, texture, and light source considered.</p>
     </div>
     <div class="process-step reveal reveal-delay-3">
-      <div class="step-dot"><span>IV</span></div>
+      <div class="step-dot"><span>04</span></div>
       <p class="step-num">Step 04</p>
       <h3>Visualize</h3>
       <p>The design is brought to life through photorealistic renders, animated walkthroughs, or immersive 360° VR — so you can feel it before it exists.</p>
     </div>
     <div class="process-step reveal reveal-delay-4">
-      <div class="step-dot"><span>V</span></div>
+      <div class="step-dot"><span>05</span></div>
       <p class="step-num">Step 05</p>
       <h3>Deliver</h3>
       <p>Final design assets, presentations, and visualization files are packaged and handed over — complete, refined, and ready for your next step.</p>
@@ -2150,8 +2425,8 @@ a:focus-visible, button:focus-visible {
     <h2 class="reveal reveal-delay-1">Let's create<br>something <em>timeless.</em></h2>
     <p class="cta-sub reveal reveal-delay-2">We work with a small number of exceptional clients each year. If you are ready to begin, we would be honoured to hear from you.</p>
     <div class="cta-buttons reveal reveal-delay-3">
-      <a href="mailto:hello@lumariq.com" class="btn-primary" id="getInTouchBtn">Get in Touch</a>
-      <a href="https://wa.me/971547073369?text=Hi%20Lumariq%2C%20I%27d%20like%20to%20enquire%20about%20a%20project." class="btn-outline" target="_blank" rel="noopener">WhatsApp Us</a>
+      <a href="mailto:hello@lumariq.com" class="btn-primary" id="getInTouchBtn">Start a conversation</a>
+      <a href="https://wa.me/971547073369?text=Hi%20Lumariq%2C%20I%27d%20like%20to%20enquire%20about%20a%20project." class="btn-text-link" target="_blank" rel="noopener">WhatsApp</a>
     </div>
   </div>
 </section>
@@ -2161,44 +2436,28 @@ a:focus-visible, button:focus-visible {
 ============================================= -->
 <footer>
   <div class="footer-inner">
-  <div class="footer-top">
-    <div class="footer-brand">
-      <a href="#" class="brand-name" aria-label="Lumariq — home"><img src="LOGO%20CREAM.png" alt="Lumariq"></a>
-      <p>Interior design and spatial visualization for those who want to feel a space before it exists.</p>
+    <div class="footer-minimal">
+      <div class="footer-brand">
+        <a href="#" class="brand-name" aria-label="Lumariq — home"><img src="LOGO%20CREAM.png" alt="Lumariq"></a>
+        <p>Interior Design &amp; Visualization</p>
+        <span>UAE · INDIA</span>
+      </div>
+      <div class="footer-contact">
+        <span class="footer-kicker">Contact</span>
+        <a href="mailto:hello@lumariq.com">hello@lumariq.com</a>
+      </div>
+      <div class="footer-contact">
+        <span class="footer-kicker">Follow</span>
+        <div class="footer-socials">
+          <a href="https://www.instagram.com/lumariq" target="_blank" rel="noopener">Instagram</a>
+          <a href="https://www.linkedin.com/company/lumariq/" target="_blank" rel="noopener">LinkedIn</a>
+        </div>
+      </div>
     </div>
-    <div class="footer-col">
-      <h4>Studio</h4>
-      <ul>
-        <li><a href="#about">About Us</a></li>
-        <li><a href="#services">Services</a></li>
-        <li><a href="#projects">Projects</a></li>
-        <li><a href="#process">Process</a></li>
-      </ul>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Lumariq Studio. All rights reserved.</p>
+      <p>A <a href="https://www.muthari.com" target="_blank" rel="noopener">Muthari</a> product.</p>
     </div>
-    <div class="footer-col">
-      <h4>Contact</h4>
-      <ul>
-        <li><a href="mailto:hello@lumariq.com">hello@lumariq.com</a></li>
-        <li><a href="#">Working Globally</a></li>
-        <li><a href="#">UAE &amp; India</a></li>
-      </ul>
-    </div>
-    <div class="footer-col">
-      <h4>Follow</h4>
-      <ul>
-        <li><a href="https://www.instagram.com/lumariq">instagram</a></li>
-        <li><a href="https://www.linkedin.com/company/lumariq/" target="_blank" rel="noopener">LinkedIn</a></li>
-      </ul>
-    </div>
-  </div>
-  <div class="footer-bottom">
-    <p>&copy; 2026 Lumariq Studio. All rights reserved. &nbsp;·&nbsp; A <a href="https://www.muthari.com" target="_blank" rel="noopener">Muthari</a> product</p>
-    <div class="social-links">
-      <a href="#">Privacy</a>
-      <a href="#">Terms</a>
-      <a href="#">Cookies</a>
-    </div>
-  </div>
   </div>
 </footer>
 
@@ -2228,43 +2487,6 @@ a:focus-visible, button:focus-visible {
      JAVASCRIPT
 ============================================= -->
 <script>
-/* ----- Custom Cursor (desktop only) ----- */
-const cursor = document.getElementById('cursor');
-const follower = document.getElementById('cursorFollower');
-const isDesktopCursor = window.matchMedia('(min-width: 901px) and (hover: hover) and (pointer: fine)');
-
-let mx = 0, my = 0, fx = 0, fy = 0;
-
-document.addEventListener('mousemove', e => {
-  if (!isDesktopCursor.matches) return;
-  mx = e.clientX;
-  my = e.clientY;
-  cursor.style.left = mx + 'px';
-  cursor.style.top = my + 'px';
-});
-
-(function animateFollower() {
-  if (isDesktopCursor.matches) {
-    fx += (mx - fx) * 0.1;
-    fy += (my - fy) * 0.1;
-    follower.style.left = fx + 'px';
-    follower.style.top = fy + 'px';
-  }
-  requestAnimationFrame(animateFollower);
-})();
-
-document.querySelectorAll('a, button, .service-card, .project-card, .process-step').forEach(el => {
-  el.addEventListener('mouseenter', () => {
-    if (!isDesktopCursor.matches) return;
-    cursor.classList.add('hover');
-    follower.classList.add('hover');
-  });
-  el.addEventListener('mouseleave', () => {
-    cursor.classList.remove('hover');
-    follower.classList.remove('hover');
-  });
-});
-
 /* ----- Nav Scroll ----- */
 const nav = document.getElementById('mainNav');
 const heroImage   = document.querySelector('.hero-image');
@@ -2280,6 +2502,7 @@ function onScrollFrame() {
 
   // Menu fades in gradually over the first 300px of scrolling
   nav.style.setProperty('--p', Math.min(y / 300, 1).toFixed(3));
+  nav.classList.toggle('nav-scrolled', y > 40);
 
   if (!reduceMotion) {
     // Hero: picture drifts slower than the page, text fades gently
@@ -2306,6 +2529,24 @@ window.addEventListener('scroll', () => {
   if (!scrollTicking) { requestAnimationFrame(onScrollFrame); scrollTicking = true; }
 }, { passive: true });
 onScrollFrame();
+
+/* ----- Light-section navigation ----- */
+const navLightSections = document.querySelectorAll('.about, .projects');
+const navObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) nav.classList.add('nav-light');
+  });
+}, { threshold: 0.18 });
+navLightSections.forEach(section => navObserver.observe(section));
+
+/* Keep the dark nav when hero/services/process/contact are dominant. */
+const darkSections = document.querySelectorAll('.hero, .services, .process, .cta-section');
+const darkObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) nav.classList.remove('nav-light');
+  });
+}, { threshold: 0.2 });
+darkSections.forEach(section => darkObserver.observe(section));
 
 /* ----- Mobile Nav (hamburger) ----- */
 const navMenuBtn = document.querySelector('.nav-menu-btn');
@@ -2348,32 +2589,8 @@ window._revealObserver = new IntersectionObserver((entries) => {
 
 revealEls.forEach(el => window._revealObserver.observe(el));
 
-/* ----- Service card: click to read the description ----- */
+/* ----- Services are intentionally informational; no popup ----- */
 const serviceModal = document.getElementById('serviceModal');
-const serviceModalText = document.getElementById('serviceModalText');
-
-function openServiceModal(text) {
-  if (!serviceModal || !text) return;
-  serviceModalText.textContent = text;
-  serviceModal.classList.add('open');
-}
-function closeServiceModal() {
-  serviceModal?.classList.remove('open');
-}
-
-document.addEventListener('click', e => {
-  const card = e.target.closest('.service-card');
-  if (card) {
-    const desc = card.querySelector('p');
-    openServiceModal(desc ? desc.textContent : '');
-    return;
-  }
-  if (e.target === serviceModal) closeServiceModal();
-});
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') closeServiceModal();
-});
 
 /* ----- Project gallery popup: opened by site.js when a Work card is clicked ----- */
 const galleryModal = document.getElementById('galleryModal');
