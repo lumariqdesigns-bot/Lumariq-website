@@ -151,46 +151,21 @@ async function loadServices() {
 
   if (error || !data || !data.length) return;
 
-  const grid = document.querySelector('.services-grid');
+  const grid = document.querySelector('.services-list');
   if (!grid) return;
 
-  // SVG icons — cycle through the ones already in the HTML
-  const icons = [
-    `<rect x="4" y="4" width="28" height="28"/><line x1="4" y1="14" x2="32" y2="14"/><line x1="14" y1="4" x2="14" y2="32"/>`,
-    `<polygon points="18,3 33,28 3,28"/><line x1="18" y1="12" x2="18" y2="21"/>`,
-    `<circle cx="18" cy="18" r="12"/><circle cx="18" cy="18" r="5"/><line x1="18" y1="3" x2="18" y2="8"/><line x1="18" y1="28" x2="18" y2="33"/>`,
-    `<circle cx="18" cy="18" r="14"/><ellipse cx="18" cy="18" rx="6" ry="14"/><line x1="4" y1="18" x2="32" y2="18"/>`,
-    `<circle cx="18" cy="12" r="7"/><path d="M4 32 C4 24 32 24 32 32"/>`,
-    `<rect x="3" y="3" width="30" height="22"/><line x1="3" y1="10" x2="33" y2="10"/><circle cx="8" cy="6.5" r="1.5"/>`,
-  ];
-
-  const delayClasses = ['', 'reveal-delay-1', 'reveal-delay-2', 'reveal-delay-3', 'reveal-delay-4', 'reveal-delay-5'];
-
   grid.innerHTML = data.map((svc, i) => `
-    <div class="service-card reveal ${delayClasses[i] || ''}">
-      <span class="service-number">${i + 1}</span>
-      <svg class="service-icon" viewBox="0 0 36 36" fill="none"
-        stroke="rgba(248,239,229,0.5)" stroke-width="1">
-        ${icons[i % icons.length]}
-      </svg>
-      <h3>${esc(svc.title)}</h3>
-      <p>${esc(svc.description || '')}</p>
-      <span class="service-arrow">→</span>
+    <div class="service-row reveal">
+      <span class="service-row-num">${String(i + 1).padStart(2, '0')}</span>
+      <h3 class="service-row-title">${esc(svc.title)}</h3>
+      <p class="service-row-desc">${esc(svc.description || '')}</p>
     </div>`).join('');
 
-  // Re-observe newly added cards for scroll reveal
   grid.querySelectorAll('.reveal').forEach(el => {
     if (window._revealObserver) window._revealObserver.observe(el);
   });
-
-  // Re-wire cursor hover
-  grid.querySelectorAll('.service-card').forEach(el => addCursorHover(el));
 }
 
-/* =============================================
-   3. TESTIMONIALS
-   Replaces .testimonials-grid with DB data.
-============================================= */
 async function loadTestimonials() {
   const { data, error } = await sb
     .from('testimonials')
@@ -258,12 +233,13 @@ async function loadFeaturedProjects() {
 
     const bgStyle = project.cover_image_url
       ? `background-image:url('${esc(project.cover_image_url)}');background-size:cover;background-position:center;`
-      : `background:linear-gradient(135deg,#1a0d07 0%,#2f1b0e 40%,#0d0806 100%);`;
+      : `background:linear-gradient(135deg,#cfc6b4 0%,#d9d2c4 100%);`;
 
     const meta = [project.category, project.location, project.year].filter(Boolean).join(' · ');
 
     // A button, not a link — clicking opens the gallery popup on this
-    // same page instead of navigating away.
+    // same page instead of navigating away. Name/location/category sit
+    // visibly below the image, not hidden behind a hover effect.
     const card        = document.createElement('button');
     card.type          = 'button';
     card.className    = `project-card reveal ${delay}`.trim();
@@ -272,11 +248,10 @@ async function loadFeaturedProjects() {
     card.innerHTML = `
       <div class="project-image">
         <div class="project-bg" style="${bgStyle}"></div>
-        <div class="project-overlay"></div>
-        <div class="project-info">
-          <p class="project-category">${esc(meta)}</p>
-          <h3 class="project-title">${esc(project.title)}</h3>
-        </div>
+      </div>
+      <div class="project-info">
+        <p class="project-category">${esc(meta)}</p>
+        <h3 class="project-title">${esc(project.title)}</h3>
       </div>`;
 
     card.addEventListener('click', () => openProjectGallery(project.id, project.title));
